@@ -212,19 +212,3 @@ class DataSet():
                 break
             print("%s: %.2f" % (class_prediction[0], class_prediction[1]))
 
-if __name__ == '__main__':
-    from PIL import Image
-    data = DataSet(seq_length=20, class_limit=3)
-    print(data.classes)
-    gen = data.frame_generator(32, 'train', 'images', False)
-    for x, y in gen:
-        # x should be 32, with each having seq_ength images.
-        for j, row in enumerate(x):
-            for i, image in enumerate(row):
-                image *= 255
-                actual = Image.fromarray(image.astype('uint8'))
-                actual.save('tmp/whatever-' + str(i) + '.jpg')
-            print(y[j])
-            data.print_class_from_prediction(y[j])
-            break
-        break
