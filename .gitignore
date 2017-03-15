@@ -1,0 +1,11 @@
+*jpg
+*rar
+*zip
+*gz
+*avi
+*swp
+data/logs/*
+data/checkpoints/*
+data/sequences/*
+data/train/*
+data/test/*
