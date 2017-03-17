@@ -67,13 +67,23 @@ def train(data_type, seq_length, model, saved_model=None,
 def main():
     """These are the main training settings. Set each before running
     this file."""
-    data_type = 'features'  # can be 'features' or 'images'
-    seq_length = 40
     model = 'lstm'  # see `models.py` for more
-    class_limit = None  # int, can be 1-101 or None
     saved_model = None  # None or weights file
-    concat = False  # true for MLP only
-    image_shape = None  # Use None for default or specify a new size
+    class_limit = None  # int, can be 1-101 or None
+
+    # Chose images or features and image shape based on network.
+    if model == 'conv_3d' or model == 'crnn':
+        data_type = 'images'
+        image_shape = (80, 80, 3)
+    else:
+        data_type = 'features'
+        image_shape = None
+
+    # MLP requires flattened features.
+    if model == 'mlp':
+        concat = True
+    else:
+        concat = False
 
     train(data_type, seq_length, model, saved_model=saved_model,
           class_limit=class_limit, concat=concat, image_shape=image_shape)
