@@ -8,7 +8,7 @@ The five video classification methods:
 1. Extract features from each frame with a ConvNet and pass the sequence to an MLP
 1. Use a 3D convolutional network
 
-See the accompanying blog post for full details: TK
+See the accompanying blog post for full details: https://medium.com/@harvitronix/five-video-classification-methods-implemented-in-keras-and-tensorflow-99cad29cc0b5
 
 ## Getting the data
 
@@ -24,7 +24,7 @@ Now you can run the scripts in the data folder to move the videos to the appropr
 
 ## Extracting features
 
-Before you can run Methods #2 and #4, you need to extract features from the images with the CNN. This is done by running `extract_features.py`. On my Dell with a GeFore 960m GPU, this takes about 8 hours. If you want to limit to just the first N classes, you can set that option in the file.
+Before you can run Methods #4 and #5, you need to extract features from the images with the CNN. This is done by running `extract_features.py`. On my Dell with a GeFore 960m GPU, this takes about 8 hours. If you want to limit to just the first N classes, you can set that option in the file.
 
 ## Running models
 
