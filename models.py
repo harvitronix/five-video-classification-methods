@@ -45,7 +45,7 @@ class ResearchModels():
             self.model = self.lstm()
         elif model == 'crnn':
             print("Loading CRNN model.")
-            self.input_shape = (seq_length, 224, 224, 3)
+            self.input_shape = (seq_length, 80, 80, 3)
             self.model = self.crnn()
         elif model == 'mlp':
             print("Loading simple MLP.")
@@ -53,7 +53,7 @@ class ResearchModels():
             self.model = self.mlp()
         elif model == 'conv_3d':
             print("Loading Conv3D")
-            self.input_shape = (seq_length, 112, 112, 3)
+            self.input_shape = (seq_length, 80, 80, 3)
             self.model = self.conv_3d()
         else:
             print("Unknown network.")
@@ -69,15 +69,11 @@ class ResearchModels():
         our CNN to this model predomenently."""
         # Model.
         model = Sequential()
-        model.add(LSTM(128, return_sequences=True, input_shape=self.input_shape,
-                       dropout_W=0.4, dropout_U=0.4))
-        model.add(LSTM(128, return_sequences=True, dropout_W=0.4, dropout_U=0.4))
-        model.add(LSTM(128, return_sequences=True, dropout_W=0.4, dropout_U=0.4))
+        model.add(LSTM(256, return_sequences=True, input_shape=self.input_shape,
+                       dropout_W=0.5, dropout_U=0.5))
         model.add(Flatten())
-        model.add(Dense(256, activation='relu'))
-        model.add(Dropout(0.2))
-        model.add(Dense(256, activation='relu'))
-        model.add(Dropout(0.2))
+        model.add(Dense(512, activation='relu'))
+        model.add(Dropout(0.5))
         model.add(Dense(self.nb_classes, activation='softmax'))
 
         return model
@@ -89,40 +85,47 @@ class ResearchModels():
             steering-models/community-models/chauffeur/models.py
         """
         model = Sequential()
-        model.add(TimeDistributed(Convolution2D(24, 5, 5,
-            init="he_normal",
+        model.add(TimeDistributed(Convolution2D(32, 3, 3,
+            init= "he_normal",
             activation='relu',
-            subsample=(5, 4),
             border_mode='valid'), input_shape=self.input_shape))
-        model.add(TimeDistributed(Convolution2D(32, 5, 5,
-            init="he_normal",
+        model.add(TimeDistributed(Convolution2D(32, 3, 3,
+            init= "he_normal",
             activation='relu',
-            subsample=(3, 2),
+            border_mode='valid')))
+        model.add(TimeDistributed(MaxPooling2D()))
+        model.add(TimeDistributed(Convolution2D(48, 3, 3,
+            init= "he_normal",
+            activation='relu',
             border_mode='valid')))
         model.add(TimeDistributed(Convolution2D(48, 3, 3,
-            init="he_normal",
+            init= "he_normal",
             activation='relu',
-            subsample=(1, 2),
+            border_mode='valid')))
+        model.add(TimeDistributed(MaxPooling2D()))
+        model.add(TimeDistributed(Convolution2D(64, 3, 3,
+            init= "he_normal",
+            activation='relu',
             border_mode='valid')))
         model.add(TimeDistributed(Convolution2D(64, 3, 3,
-            init="he_normal",
+            init= "he_normal",
+            activation='relu',
+            border_mode='valid')))
+        model.add(TimeDistributed(MaxPooling2D()))
+        model.add(TimeDistributed(Convolution2D(128, 3, 3,
+            init= "he_normal",
             activation='relu',
             border_mode='valid')))
         model.add(TimeDistributed(Convolution2D(128, 3, 3,
-            init="he_normal",
+            init= "he_normal",
             activation='relu',
-            subsample=(1, 2),
             border_mode='valid')))
+        model.add(TimeDistributed(MaxPooling2D()))
         model.add(TimeDistributed(Flatten()))
-        model.add(Dropout(0.2))
-        model.add(GRU(128, return_sequences=True))
-        model.add(Dropout(0.2))
-        model.add(GRU(128, return_sequences=True))
-        model.add(Dropout(0.2))
-        model.add(GRU(128, return_sequences=True))
+        model.add(LSTM(256, return_sequences=True))
         model.add(Flatten())
-        model.add(Dense(256))
-        model.add(Dropout(0.2))
+        model.add(Dense(512))
+        model.add(Dropout(0.5))
         model.add(Dense(self.nb_classes, activation='softmax'))
 
         return model
@@ -132,79 +135,34 @@ class ResearchModels():
         # Model.
         model = Sequential()
         model.add(Dense(512, input_dim=self.input_shape))
-        model.add(Dropout(0.4))
+        model.add(Dropout(0.5))
         model.add(Dense(512))
-        model.add(Dropout(0.4))
-        model.add(Dense(512))
-        model.add(Dropout(0.4))
-        model.add(Dense(512))
-        model.add(Dropout(0.4))
-        model.add(Dense(512))
-        model.add(Dropout(0.4))
+        model.add(Dropout(0.5))
         model.add(Dense(self.nb_classes, activation='softmax'))
 
         return model
 
     def conv_3d(self):
         """
-        Build a 3D convolutional network, C3D.
-
-        Based on the paper:
+        Build a 3D convolutional network, based loosely on C3D.
             https://arxiv.org/pdf/1412.0767.pdf
-
-        As implemented in Keras by:
-            https://gist.github.com/albertomontesg/d8b21a179c1e6cca0480ebdf292c34d2
-
-        Note that this requires a lot of memory to run.
         """
+        # Model.
         model = Sequential()
-        # 1st layer group
-        model.add(Convolution3D(64, 3, 3, 3, activation='relu', 
-                                border_mode='same', name='conv1',
-                                subsample=(1, 1, 1), 
-                                input_shape=self.input_shape))
-        model.add(MaxPooling3D(pool_size=(1, 2, 2), strides=(1, 2, 2), 
-                               border_mode='valid', name='pool1'))
-        # 2nd layer group
-        model.add(Convolution3D(128, 3, 3, 3, activation='relu',
-                                border_mode='same', name='conv2',
-                                subsample=(1, 1, 1)))
-        model.add(MaxPooling3D(pool_size=(2, 2, 2), strides=(2, 2, 2), 
-                               border_mode='valid', name='pool2'))
-        # 3rd layer group
-        model.add(Convolution3D(256, 3, 3, 3, activation='relu',
-                                border_mode='same', name='conv3a',
-                                subsample=(1, 1, 1)))
-        model.add(Convolution3D(256, 3, 3, 3, activation='relu', 
-                                border_mode='same', name='conv3b',
-                                subsample=(1, 1, 1)))
-        model.add(MaxPooling3D(pool_size=(2, 2, 2), strides=(2, 2, 2), 
-                               border_mode='valid', name='pool3'))
-        # 4th layer group
-        model.add(Convolution3D(512, 3, 3, 3, activation='relu', 
-                                border_mode='same', name='conv4a',
-                                subsample=(1, 1, 1)))
-        model.add(Convolution3D(512, 3, 3, 3, activation='relu', 
-                                border_mode='same', name='conv4b',
-                                subsample=(1, 1, 1)))
-        model.add(MaxPooling3D(pool_size=(2, 2, 2), strides=(2, 2, 2), 
-                               border_mode='valid', name='pool4'))
-        # 5th layer group
-        model.add(Convolution3D(512, 3, 3, 3, activation='relu', 
-                                border_mode='same', name='conv5a',
-                                subsample=(1, 1, 1)))
-        model.add(Convolution3D(512, 3, 3, 3, activation='relu', 
-                                border_mode='same', name='conv5b',
-                                subsample=(1, 1, 1)))
-        model.add(ZeroPadding3D(padding=(0, 1, 1)))
-        model.add(MaxPooling3D(pool_size=(2, 2, 2), strides=(2, 2, 2), 
-                               border_mode='valid', name='pool5'))
+        model.add(Convolution3D(
+            32, 7, 7, 7, activation='relu', input_shape=self.input_shape
+        ))
+        model.add(MaxPooling3D(pool_size=(1, 2, 2), strides=(1, 2, 2)))
+        model.add(Convolution3D(64, 3, 3, 3, activation='relu'))
+        model.add(MaxPooling3D(pool_size=(1, 2, 2), strides=(1, 2, 2)))
+        model.add(Convolution3D(128, 2, 2, 2, activation='relu'))
+        model.add(MaxPooling3D(pool_size=(1, 2, 2), strides=(1, 2, 2)))
         model.add(Flatten())
-        # FC layers group
-        model.add(Dense(4096, activation='relu', name='fc6'))
-        model.add(Dropout(.5))
-        model.add(Dense(4096, activation='relu', name='fc7'))
-        model.add(Dropout(.5))
-        model.add(Dense(487, activation='softmax', name='fc8'))
+        model.add(Dense(256))
+        model.add(Dropout(0.2))
+        model.add(Dense(256))
+        model.add(Dropout(0.2))
+        model.add(Dense(self.nb_classes, activation='softmax'))
+
         return model
 
