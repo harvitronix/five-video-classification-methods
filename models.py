@@ -2,12 +2,14 @@
 A collection of models we'll use to attempt to classify videos.
 """
 from keras.layers import Dense, Flatten, Dropout
-from keras.layers.recurrent import LSTM, GRU
+from keras.layers.recurrent import LSTM
 from keras.models import Sequential, load_model
 from keras.optimizers import Adam
 from keras.layers.wrappers import TimeDistributed
-from keras.layers.convolutional import Convolution2D, MaxPooling3D, Convolution3D
+from keras.layers.convolutional import (Convolution2D, MaxPooling3D, Convolution3D,
+    MaxPooling2D)
 from collections import deque
+import sys
 
 class ResearchModels():
     def __init__(self, nb_classes, model, seq_length,
@@ -165,4 +167,3 @@ class ResearchModels():
         model.add(Dense(self.nb_classes, activation='softmax'))
 
         return model
-

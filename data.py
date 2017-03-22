@@ -112,7 +112,7 @@ class DataSet():
             X, y = [], []
 
             # Generate batch_size samples.
-            for i in range(batch_size):
+            for _ in range(batch_size):
                 # Reset to be safe.
                 sequence = None
 
@@ -211,4 +211,3 @@ class DataSet():
             if i > nb_to_return - 1 or class_prediction[1] == 0.0:
                 break
             print("%s: %.2f" % (class_prediction[0], class_prediction[1]))
-

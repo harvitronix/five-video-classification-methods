@@ -2,14 +2,12 @@
 Validate our RNN. Basically just runs a validation generator on
 about the same number of videos as we have in our test set.
 """
-from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping, CSVLogger
+from keras.callbacks import TensorBoard, ModelCheckpoint, CSVLogger
 from models import ResearchModels
 from data import DataSet
-from PIL import Image
-import time
 
 def validate(data_type, model, seq_length=40, saved_model=None,
-          concat=False, class_limit=None, image_shape=None):
+             concat=False, class_limit=None, image_shape=None):
     batch_size = 32
 
     # Get the data and process it.
@@ -24,7 +22,7 @@ def validate(data_type, model, seq_length=40, saved_model=None,
             class_limit=class_limit,
             image_shape=image_shape
         )
-    
+
     val_generator = data.frame_generator(batch_size, 'test', data_type, concat)
 
     # Get the model.

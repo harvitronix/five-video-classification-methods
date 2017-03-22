@@ -70,6 +70,7 @@ def main():
     model = 'lstm'  # see `models.py` for more
     saved_model = None  # None or weights file
     class_limit = None  # int, can be 1-101 or None
+    seq_length = 40
 
     # Chose images or features and image shape based on network.
     if model == 'conv_3d' or model == 'crnn':
