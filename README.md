@@ -18,7 +18,7 @@ First, download the dataset from UCF into the `data` folder:
 
 Then extract it with `unrar -e UCF101.rar`.
 
-Next, create train and test folders with `mkdir train && mkdir test`.
+Next, create folders with `mkdir train && mkdir test && mkdir sequences && mkdir checkpoints`.
 
 Now you can run the scripts in the data folder to move the videos to the appropriate place, extract their frames and make the CSV file the rest of the code references.
 
