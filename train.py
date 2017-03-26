@@ -7,7 +7,8 @@ from data import DataSet
 import time
 
 def train(data_type, seq_length, model, saved_model=None,
-          concat=False, class_limit=None, image_shape=None):
+          concat=False, class_limit=None, image_shape=None,
+          load_to_memory=False):
     # Set variables.
     nb_epoch = 1000
     batch_size = 32
@@ -47,22 +48,40 @@ def train(data_type, seq_length, model, saved_model=None,
     # Multiply by 0.7 to attempt to guess how much of data.data is the train set.
     samples_per_epoch = ((len(data.data) * 0.7) // batch_size) * batch_size
 
-    # Get generators.
-    generator = data.frame_generator(batch_size, 'train', data_type, concat)
-    val_generator = data.frame_generator(batch_size, 'test', data_type, concat)
+    if load_to_memory:
+        # Get data.
+        X, y = data.get_all_sequences_in_memory(batch_size, 'train', data_type, concat)
+        X_test, y_test = data.get_all_sequences_in_memory(batch_size, 'test', data_type, concat)
+    else:
+        # Get generators.
+        generator = data.frame_generator(batch_size, 'train', data_type, concat)
+        val_generator = data.frame_generator(batch_size, 'test', data_type, concat)
 
     # Get the model.
     rm = ResearchModels(len(data.classes), model, seq_length, saved_model)
 
     # Fit!
-    rm.model.fit_generator(
-        generator=generator,
-        samples_per_epoch=samples_per_epoch,
-        nb_epoch=nb_epoch,
-        verbose=1,
-        callbacks=[checkpointer, tb, early_stopper, csv_logger],
-        validation_data=val_generator,
-        nb_val_samples=256)
+    if load_to_memory:
+        # Use standard fit.
+        rm.model.fit(
+            X,
+            y,
+            batch_size=batch_size,
+            validation_data=(X_test, y_test),
+            verbose=1,
+            callbacks=[checkpointer, tb, early_stopper, csv_logger],
+            nb_epoch=nb_epoch,
+            samples_per_epoch=samples_per_epoch)
+    else:
+        # Use fit generator.
+        rm.model.fit_generator(
+            generator=generator,
+            samples_per_epoch=samples_per_epoch,
+            nb_epoch=nb_epoch,
+            verbose=1,
+            callbacks=[checkpointer, tb, early_stopper, csv_logger],
+            validation_data=val_generator,
+            nb_val_samples=256)
 
 def main():
     """These are the main training settings. Set each before running
@@ -71,6 +90,7 @@ def main():
     saved_model = None  # None or weights file
     class_limit = None  # int, can be 1-101 or None
     seq_length = 40
+    load_to_memory = True  # pre-load the sequences into memory
 
     # Chose images or features and image shape based on network.
     if model == 'conv_3d' or model == 'crnn':
@@ -87,7 +107,8 @@ def main():
         concat = False
 
     train(data_type, seq_length, model, saved_model=saved_model,
-          class_limit=class_limit, concat=concat, image_shape=image_shape)
+          class_limit=class_limit, concat=concat, image_shape=image_shape,
+          load_to_memory=load_to_memory)
 
 if __name__ == '__main__':
     main()

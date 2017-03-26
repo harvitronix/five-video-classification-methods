@@ -96,6 +96,36 @@ class DataSet():
                 test.append(item)
         return train, test
 
+    def get_all_sequences_in_memory(self, batch_Size, train_test, data_type, concat=False):
+        """
+        This is a mirror of our generator, but attempts to load everything into
+        memory so we can train way faster.
+        """
+        # Get the right dataset.
+        train, test = self.split_train_test()
+        data = train if train_test == 'train' else test
+
+        print("Getting %s data with %d samples." % (train_test, len(data)))
+
+        X, y = [], []
+        for row in data:
+
+            sequence = self.get_bottlecap_sequence(data_type, row)
+
+            if sequence is None:
+                print("Can't find sequence. Did you generate them?")
+                raise
+
+            if concat:
+                # We want to pass the sequence back as a single array. This
+                # is used to pass into a CNN or MLP, rather than an RNN.
+                sequence = np.concatenate(sequence).ravel()
+
+            X.append(sequence)
+            y.append(self.get_class_one_hot(row[1]))
+
+        return np.array(X), np.array(y)
+
     def frame_generator(self, batch_size, train_test, data_type, concat=False):
         """Return a generator that we can use to train on. There are
         a couple different things we can return:
