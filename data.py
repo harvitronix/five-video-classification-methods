@@ -110,7 +110,7 @@ class DataSet():
         X, y = [], []
         for row in data:
 
-            sequence = self.get_bottlecap_sequence(data_type, row)
+            sequence = self.get_extracted_sequence(data_type, row)
 
             if sequence is None:
                 print("Can't find sequence. Did you generate them?")
