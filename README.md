@@ -20,6 +20,8 @@ Then extract it with `unrar -e UCF101.rar`.
 
 Next, create folders with `mkdir train && mkdir test && mkdir sequences && mkdir checkpoints`.
 
+You will need to update the files in data/ucfTrainTestlists/ which specifies which video files you want to test and train on. It is quite easy to add/remove with an editor that does vertical/multi line editing (ls -l -> highlight + copy -> paste into file -> delete the prefixes across each line).
+
 Now you can run the scripts in the data folder to move the videos to the appropriate place, extract their frames and make the CSV file the rest of the code references.
 
 ## Extracting features

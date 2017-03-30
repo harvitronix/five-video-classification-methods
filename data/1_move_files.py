@@ -6,6 +6,7 @@ Should only run this file once!
 """
 import os
 import os.path
+import re
 
 def get_train_test_lists(version='01'):
     """
@@ -44,9 +45,10 @@ def move_files(file_groups):
         for video in videos:
 
             # Get the parts.
-            parts = video.split('/')
-            classname = parts[0]
-            filename = parts[1]
+            parts = re.compile('_g\d+_').search(video)
+            classname = video[2: parts.start()] # 2 removes 'v_'
+            filename = video[parts.start()+1:]  # +1 removes '_'
+
 
             # Check if this class exists.
             if not os.path.exists(group + '/' + classname):
@@ -55,14 +57,14 @@ def move_files(file_groups):
 
             # Check if we have already moved this file, or at least that it
             # exists to move.
-            if not os.path.exists(filename):
-                print("Can't find %s to move. Skipping." % (filename))
+            if not os.path.exists(video):
+                print("Can't find %s to move. Skipping." % (video))
                 continue
 
             # Move it.
             dest = group + '/' + classname + '/' + filename
-            print("Moving %s to %s" % (filename, dest))
-            os.rename(filename, dest)
+            print("Moving %s to %s" % (video, dest))
+            os.rename(video, dest)
 
     print("Done.")
 
