@@ -16,7 +16,7 @@ First, download the dataset from UCF into the `data` folder:
 
 `cd data && wget http://crcv.ucf.edu/data/UCF101/UCF101.rar`
 
-Then extract it with `unrar -e UCF101.rar`.
+Then extract it with `unrar e UCF101.rar`.
 
 Next, create folders with `mkdir train && mkdir test && mkdir sequences && mkdir checkpoints`.
 
