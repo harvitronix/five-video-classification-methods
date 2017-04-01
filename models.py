@@ -42,7 +42,7 @@ class ResearchModels():
             print("Loading model %s" % self.saved_model)
             self.model = load_model(self.saved_model)
         elif model == 'lstm':
-            print("Loading Deep LSTM model.")
+            print("Loading LSTM model.")
             self.input_shape = (seq_length, features_length)
             self.model = self.lstm()
         elif model == 'crnn':
