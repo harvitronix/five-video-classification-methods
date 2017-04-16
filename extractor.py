@@ -47,7 +47,7 @@ class Extractor():
 
         if self.weights is None:
             # For imagenet/default network:
-            features = features[0][0][0]
+            features = features[0]
         else:
             # For loaded network:
             features = features[0]
