@@ -95,6 +95,7 @@ def main():
     if model == 'conv_3d' or model == 'crnn':
         data_type = 'images'
         image_shape = (80, 80, 3)
+        load_to_memory = False
     else:
         data_type = 'features'
         image_shape = None
