@@ -72,7 +72,7 @@ class ResearchModels():
         # Model.
         model = Sequential()
         model.add(LSTM(4096, return_sequences=True, input_shape=self.input_shape,
-                       dropout_W=0.5, dropout_U=0.5))
+                       dropout=0.5))
         model.add(Flatten())
         model.add(Dense(1024, activation='relu'))
         model.add(Dropout(0.5))
