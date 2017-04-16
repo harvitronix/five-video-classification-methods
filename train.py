@@ -46,7 +46,7 @@ def train(data_type, seq_length, model, saved_model=None,
 
     # Get samples per epoch.
     # Multiply by 0.7 to attempt to guess how much of data.data is the train set.
-    samples_per_epoch = ((len(data.data) * 0.7) // batch_size) * batch_size
+    steps_per_epoch = (len(data.data) * 0.7) // batch_size
 
     if load_to_memory:
         # Get data.
@@ -70,18 +70,17 @@ def train(data_type, seq_length, model, saved_model=None,
             validation_data=(X_test, y_test),
             verbose=1,
             callbacks=[checkpointer, tb, early_stopper, csv_logger],
-            nb_epoch=nb_epoch,
-            samples_per_epoch=samples_per_epoch)
+            epochs=nb_epoch)
     else:
         # Use fit generator.
         rm.model.fit_generator(
             generator=generator,
-            samples_per_epoch=samples_per_epoch,
-            nb_epoch=nb_epoch,
+            steps_per_epoch=steps_per_epoch,
+            epochs=nb_epoch,
             verbose=1,
             callbacks=[checkpointer, tb, early_stopper, csv_logger],
             validation_data=val_generator,
-            nb_val_samples=256)
+            validation_steps=10)
 
 def main():
     """These are the main training settings. Set each before running
@@ -96,6 +95,7 @@ def main():
     if model == 'conv_3d' or model == 'crnn':
         data_type = 'images'
         image_shape = (80, 80, 3)
+        load_to_memory = False
     else:
         data_type = 'features'
         image_shape = None

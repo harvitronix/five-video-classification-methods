@@ -159,7 +159,7 @@ class DataSet():
                     sequence = self.build_image_sequence(frames)
                 else:
                     # Get the sequence from disk.
-                    sequence = self.get_extracted_sequence(sample)
+                    sequence = self.get_extracted_sequence(data_type, sample)
 
                 if sequence is None:
                     print("Can't find sequence. Did you generate them?")
@@ -179,11 +179,11 @@ class DataSet():
         """Given a set of frames (filenames), build our sequence."""
         return [process_image(x, self.image_shape) for x in frames]
 
-    def get_extracted_sequence(self, sample):
+    def get_extracted_sequence(self, data_type, sample):
         """Get the saved extracted features."""
         filename = sample[2]
         path = self.sequence_path + filename + '-' + str(self.seq_length) + \
-            '-features.txt'
+            '-' + data_type + '.txt'
         if os.path.isfile(path):
             # Use a dataframe/read_csv for speed increase over numpy.
             features = pd.read_csv(path, sep=" ", header=None)

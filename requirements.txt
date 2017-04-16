@@ -1,0 +1,5 @@
+Keras>=2.0.2
+numpy>=1.12.1
+pandas>=0.19.2
+tqdm>=4.11.2
+matplotlib>=2.0.0

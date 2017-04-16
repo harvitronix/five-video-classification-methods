@@ -69,7 +69,7 @@ def get_model(weights='imagenet'):
     predictions = Dense(len(data.classes), activation='softmax')(x)
 
     # this is the model we will train
-    model = Model(input=base_model.input, output=predictions)
+    model = Model(inputs=base_model.input, outputs=predictions)
     return model
 
 def get_top_layer_model(base_model):
@@ -106,10 +106,10 @@ def train_model(model, nb_epoch, generators, callbacks=[]):
     train_generator, validation_generator = generators
     model.fit_generator(
         train_generator,
-        samples_per_epoch=128,
+        steps_per_epoch=100,
         validation_data=validation_generator,
-        nb_val_samples=768,
-        nb_epoch=nb_epoch,
+        validation_steps=10,
+        epochs=nb_epoch,
         callbacks=callbacks)
     return model
 

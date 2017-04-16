@@ -13,17 +13,15 @@ class Extractor():
 
         if weights is None:
             # Get model with pretrained weights.
-            input_tensor = Input(shape=(299, 299, 3))
             base_model = InceptionV3(
-                input_tensor=input_tensor,
                 weights='imagenet',
                 include_top=True
             )
 
             # We'll extract features at the final pool layer.
             self.model = Model(
-                input=base_model.input,
-                output=base_model.get_layer('avg_pool').output
+                inputs=base_model.input,
+                outputs=base_model.get_layer('avg_pool').output
             )
 
         else:
@@ -49,7 +47,7 @@ class Extractor():
 
         if self.weights is None:
             # For imagenet/default network:
-            features = features[0][0][0]
+            features = features[0]
         else:
             # For loaded network:
             features = features[0]
