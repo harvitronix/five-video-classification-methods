@@ -18,9 +18,13 @@ First, download the dataset from UCF into the `data` folder:
 
 Then extract it with `unrar e UCF101.rar`.
 
-Next, create folders with `mkdir train && mkdir test && mkdir sequences && mkdir checkpoints`.
+Next, create folders (still in the data folder) with `mkdir train && mkdir test && mkdir sequences && mkdir checkpoints`.
 
-Now you can run the scripts in the data folder to move the videos to the appropriate place, extract their frames and make the CSV file the rest of the code references.
+Now you can run the scripts in the data folder to move the videos to the appropriate place, extract their frames and make the CSV file the rest of the code references. You need to run these in order. Example:
+
+`python 1_move_files.py`
+
+`python 2_extract_files.py`
 
 ## Extracting features
 
