@@ -69,7 +69,7 @@ def get_model(weights='imagenet'):
     predictions = Dense(len(data.classes), activation='softmax')(x)
 
     # this is the model we will train
-    model = Model(input=base_model.input, output=predictions)
+    model = Model(inputs=base_model.input, outputs=predictions)
     return model
 
 def get_top_layer_model(base_model):
