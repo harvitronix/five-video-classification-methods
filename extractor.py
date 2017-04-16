@@ -13,9 +13,7 @@ class Extractor():
 
         if weights is None:
             # Get model with pretrained weights.
-            input_tensor = Input(shape=(299, 299, 3))
             base_model = InceptionV3(
-                input_tensor=input_tensor,
                 weights='imagenet',
                 include_top=True
             )
@@ -41,8 +39,8 @@ class Extractor():
     def extract(self, image_path):
         img = image.load_img(image_path, target_size=(299, 299))
         x = image.img_to_array(img)
-        x = preprocess_input(x)
         x = np.expand_dims(x, axis=0)
+        x = preprocess_input(x)
 
         # Get the prediction.
         features = self.model.predict(x)
