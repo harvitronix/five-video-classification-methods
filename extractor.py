@@ -22,8 +22,8 @@ class Extractor():
 
             # We'll extract features at the final pool layer.
             self.model = Model(
-                input=base_model.input,
-                output=base_model.get_layer('avg_pool').output
+                inputs=base_model.input,
+                outputs=base_model.get_layer('avg_pool').output
             )
 
         else:
@@ -41,8 +41,8 @@ class Extractor():
     def extract(self, image_path):
         img = image.load_img(image_path, target_size=(299, 299))
         x = image.img_to_array(img)
-        x = np.expand_dims(x, axis=0)
         x = preprocess_input(x)
+        x = np.expand_dims(x, axis=0)
 
         # Get the prediction.
         features = self.model.predict(x)
