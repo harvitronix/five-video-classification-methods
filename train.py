@@ -87,7 +87,7 @@ def main():
     this file."""
     model = 'lstm'  # see `models.py` for more
     saved_model = None  # None or weights file
-    class_limit = Non  # int, can be 1-101 or None
+    class_limit = None  # int, can be 1-101 or None
     seq_length = 40
     load_to_memory = True  # pre-load the sequences into memory
 
