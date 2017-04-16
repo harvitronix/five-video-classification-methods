@@ -6,7 +6,7 @@ from keras.layers.recurrent import LSTM
 from keras.models import Sequential, load_model
 from keras.optimizers import Adam
 from keras.layers.wrappers import TimeDistributed
-from keras.layers.convolutional import (Convolution2D, MaxPooling3D, Convolution3D,
+from keras.layers.convolutional import (Conv2D, MaxPooling3D, Conv3D,
     MaxPooling2D)
 from collections import deque
 import sys
@@ -87,41 +87,33 @@ class ResearchModels():
             steering-models/community-models/chauffeur/models.py
         """
         model = Sequential()
-        model.add(TimeDistributed(Convolution2D(32, 3, 3,
-            init= "he_normal",
-            activation='relu',
-            border_mode='valid'), input_shape=self.input_shape))
-        model.add(TimeDistributed(Convolution2D(32, 3, 3,
-            init= "he_normal",
-            activation='relu',
-            border_mode='valid')))
+        model.add(TimeDistributed(Conv2D(32, (3,3),
+            kernel_initializer="he_normal",
+            activation='relu'), input_shape=self.input_shape))
+        model.add(TimeDistributed(Conv2D(32, (3,3),
+            kernel_initializer="he_normal",
+            activation='relu')))
         model.add(TimeDistributed(MaxPooling2D()))
-        model.add(TimeDistributed(Convolution2D(48, 3, 3,
-            init= "he_normal",
-            activation='relu',
-            border_mode='valid')))
-        model.add(TimeDistributed(Convolution2D(48, 3, 3,
-            init= "he_normal",
-            activation='relu',
-            border_mode='valid')))
+        model.add(TimeDistributed(Conv2D(48, (3,3),
+            kernel_initializer="he_normal",
+            activation='relu')))
+        model.add(TimeDistributed(Conv2D(48, (3,3),
+            kernel_initializer="he_normal",
+            activation='relu')))
         model.add(TimeDistributed(MaxPooling2D()))
-        model.add(TimeDistributed(Convolution2D(64, 3, 3,
-            init= "he_normal",
-            activation='relu',
-            border_mode='valid')))
-        model.add(TimeDistributed(Convolution2D(64, 3, 3,
-            init= "he_normal",
-            activation='relu',
-            border_mode='valid')))
+        model.add(TimeDistributed(Conv2D(64, (3,3),
+            kernel_initializer="he_normal",
+            activation='relu')))
+        model.add(TimeDistributed(Conv2D(64, (3,3),
+            kernel_initializer="he_normal",
+            activation='relu')))
         model.add(TimeDistributed(MaxPooling2D()))
-        model.add(TimeDistributed(Convolution2D(128, 3, 3,
-            init= "he_normal",
-            activation='relu',
-            border_mode='valid')))
-        model.add(TimeDistributed(Convolution2D(128, 3, 3,
-            init= "he_normal",
-            activation='relu',
-            border_mode='valid')))
+        model.add(TimeDistributed(Conv2D(128, (3,3),
+            kernel_initializer="he_normal",
+            activation='relu')))
+        model.add(TimeDistributed(Conv2D(128, (3,3),
+            kernel_initializer="he_normal",
+            activation='relu')))
         model.add(TimeDistributed(MaxPooling2D()))
         model.add(TimeDistributed(Flatten()))
         model.add(LSTM(256, return_sequences=True))
@@ -151,13 +143,13 @@ class ResearchModels():
         """
         # Model.
         model = Sequential()
-        model.add(Convolution3D(
-            32, 7, 7, 7, activation='relu', input_shape=self.input_shape
+        model.add(Conv3D(
+            32, (7,7,7), activation='relu', input_shape=self.input_shape
         ))
         model.add(MaxPooling3D(pool_size=(1, 2, 2), strides=(1, 2, 2)))
-        model.add(Convolution3D(64, 3, 3, 3, activation='relu'))
+        model.add(Conv3D(64, (3,3,3), activation='relu'))
         model.add(MaxPooling3D(pool_size=(1, 2, 2), strides=(1, 2, 2)))
-        model.add(Convolution3D(128, 2, 2, 2, activation='relu'))
+        model.add(Conv3D(128, (2,2,2), activation='relu'))
         model.add(MaxPooling3D(pool_size=(1, 2, 2), strides=(1, 2, 2)))
         model.add(Flatten())
         model.add(Dense(256))
