@@ -40,7 +40,7 @@ def main():
     model = 'mlp'
     saved_model = 'data/ucf101/checkpoints/mlp-features.023-0.926.hdf5'
 
-    if model == 'conv_3d' or model == 'crnn':
+    if model == 'conv_3d' or model == 'lrcn':
         data_type = 'images'
         image_shape = (80, 80, 3)
     else:
