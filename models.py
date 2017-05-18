@@ -47,7 +47,7 @@ class ResearchModels():
             self.model = self.lstm()
         elif model == 'lrcn':
             print("Loading CNN-LSTM model.")
-            self.input_shape = (seq_length, 80, 80, 3)
+            self.input_shape = (seq_length, 150, 150, 3)
             self.model = self.lrcn()
         elif model == 'mlp':
             print("Loading simple MLP.")
@@ -96,48 +96,29 @@ class ResearchModels():
         """
         model = Sequential()
 
+        model.add(TimeDistributed(Conv2D(32, (5, 5), strides=(2, 2),
+            activation='relu', padding='same'), input_shape=self.input_shape))
         model.add(TimeDistributed(Conv2D(32, (3,3),
-            kernel_initializer="he_normal",
-            activation='relu'), input_shape=self.input_shape))
-        model.add(TimeDistributed(Conv2D(32, (3,3),
-            kernel_initializer="he_normal",
-            activation='relu')))
-        model.add(TimeDistributed(MaxPooling2D()))
+            kernel_initializer="he_normal", activation='relu')))
+        model.add(TimeDistributed(MaxPooling2D((2, 2), strides=(2, 2))))
 
         model.add(TimeDistributed(Conv2D(64, (3,3),
-            kernel_initializer="he_normal",
-            activation='relu')))
+            padding='same', activation='relu')))
         model.add(TimeDistributed(Conv2D(64, (3,3),
-            kernel_initializer="he_normal",
-            activation='relu')))
-        model.add(TimeDistributed(MaxPooling2D()))
+            padding='same', activation='relu')))
+        model.add(TimeDistributed(MaxPooling2D((2, 2), strides=(2, 2))))
 
         model.add(TimeDistributed(Conv2D(128, (3,3),
-            kernel_initializer="he_normal",
-            activation='relu')))
+            kernel_initializer="he_normal", activation='relu')))
         model.add(TimeDistributed(Conv2D(128, (3,3),
-            kernel_initializer="he_normal",
-            activation='relu')))
-        model.add(TimeDistributed(MaxPooling2D()))
-
-        model.add(TimeDistributed(Conv2D(256, (3,3),
-            kernel_initializer="he_normal",
-            activation='relu')))
-        model.add(TimeDistributed(Conv2D(256, (3,3),
-            kernel_initializer="he_normal",
-            activation='relu')))
-        model.add(TimeDistributed(MaxPooling2D()))
-
-        """
-        model.add(TimeDistributed(Flatten()))
-
-        model.add(TimeDistributed(Dense(1024, activation='relu')))
-        model.add(TimeDistributed(Dropout(0.9)))
-        model.add(TimeDistributed(Dense(1024, activation='relu')))
-        model.add(TimeDistributed(Dropout(0.9)))
-        """
+            kernel_initializer="he_normal", activation='relu')))
+        model.add(TimeDistributed(Conv2D(128, (3,3),
+            kernel_initializer="he_normal", activation='relu')))
+        model.add(TimeDistributed(MaxPooling2D((2, 2), strides=(2, 2))))
 
         model.add(TimeDistributed(Flatten()))
+
+        model.add(Dropout(0.9))
         model.add(LSTM(256, return_sequences=False, dropout=0.9))
         model.add(Dense(self.nb_classes, activation='softmax'))
 
