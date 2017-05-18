@@ -1,5 +1,5 @@
 """
-Train our RNN on bottlecap or prediction files generated from our CNN.
+Train our RNN on extracted features or images.
 """
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping, CSVLogger
 from models import ResearchModels
