@@ -10,7 +10,7 @@ def train(data_type, seq_length, model, saved_model=None,
           concat=False, class_limit=None, image_shape=None,
           load_to_memory=False):
     # Set variables.
-    nb_epoch = 100000
+    nb_epoch = 1000000
     batch_size = 32
 
     # Helper: Save the model.
@@ -24,7 +24,7 @@ def train(data_type, seq_length, model, saved_model=None,
     tb = TensorBoard(log_dir='./data/logs')
 
     # Helper: Stop when we stop learning.
-    early_stopper = EarlyStopping(patience=10000)
+    early_stopper = EarlyStopping(patience=100000)
 
     # Helper: Save results.
     timestamp = time.time()
@@ -85,15 +85,18 @@ def train(data_type, seq_length, model, saved_model=None,
 def main():
     """These are the main training settings. Set each before running
     this file."""
-    model = 'lrcn'  # see `models.py` for more
+    model = 'conv_3d'  # see `models.py` for more
     saved_model = None  # None or weights file
-    class_limit = 50  # int, can be 1-101 or None
+    class_limit = 2  # int, can be 1-101 or None
     seq_length = 40
     load_to_memory = True  # pre-load the sequences into memory
 
     # Chose images or features and image shape based on network.
-    if model == 'conv_3d' or model == 'lrcn':
+    if model == 'conv_3d':
         data_type = 'images'
+        image_shape = (80, 80, 3)
+    elif model == 'lrcn':
+        data_type = 'image'
         image_shape = (150, 150, 3)
     else:
         data_type = 'features'

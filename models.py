@@ -1,10 +1,10 @@
 """
 A collection of models we'll use to attempt to classify videos.
 """
-from keras.layers import Dense, Flatten, Dropout, Reshape
+from keras.layers import Dense, Flatten, Dropout, Reshape, Input
 from keras.layers.recurrent import LSTM
 from keras.models import Sequential, load_model
-from keras.optimizers import Adam
+from keras.optimizers import Adam, RMSprop
 from keras.layers.wrappers import TimeDistributed
 from keras.layers.convolutional import (Conv2D, MaxPooling3D, Conv3D,
     MaxPooling2D)
@@ -66,7 +66,7 @@ class ResearchModels():
             sys.exit()
 
         # Now compile the network.
-        optimizer = Adam(lr=0.0001, decay=1e-6)
+        optimizer = Adam(lr=0.00001, decay=1e-6)
         self.model.compile(loss='categorical_crossentropy', optimizer=optimizer,
                            metrics=metrics)
 
@@ -158,18 +158,23 @@ class ResearchModels():
         # Model.
         model = Sequential()
         model.add(Conv3D(
-            32, (7,7,7), activation='relu', input_shape=self.input_shape
+            32, (3,3,3), activation='relu', input_shape=self.input_shape
         ))
         model.add(MaxPooling3D(pool_size=(1, 2, 2), strides=(1, 2, 2)))
         model.add(Conv3D(64, (3,3,3), activation='relu'))
         model.add(MaxPooling3D(pool_size=(1, 2, 2), strides=(1, 2, 2)))
-        model.add(Conv3D(128, (2,2,2), activation='relu'))
+        model.add(Conv3D(128, (3,3,3), activation='relu'))
+        model.add(Conv3D(128, (3,3,3), activation='relu'))
         model.add(MaxPooling3D(pool_size=(1, 2, 2), strides=(1, 2, 2)))
+        model.add(Conv3D(256, (2,2,2), activation='relu'))
+        model.add(Conv3D(256, (2,2,2), activation='relu'))
+        model.add(MaxPooling3D(pool_size=(1, 2, 2), strides=(1, 2, 2)))
+
         model.add(Flatten())
-        model.add(Dense(256))
-        model.add(Dropout(0.2))
-        model.add(Dense(256))
-        model.add(Dropout(0.2))
+        model.add(Dense(1024))
+        model.add(Dropout(0.5))
+        model.add(Dense(1024))
+        model.add(Dropout(0.5))
         model.add(Dense(self.nb_classes, activation='softmax'))
 
         return model
@@ -205,7 +210,7 @@ class ResearchModels():
         x = Reshape((1, -1))(x)  
 
         # Add the LSTM.
-        x = LSTM(256, stateful=True, dropout=0.9)(x)
+        x = LSTM(256, batch_input_shape=(1, 1, -1), stateful=True, dropout=0.9)(x)
 
         predictions = Dense(self.nb_classes, activation='softmax')(x)
 
