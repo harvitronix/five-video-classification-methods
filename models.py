@@ -223,3 +223,5 @@ class ResearchModels():
         model.add(Dense(4096, activation='relu', name='fc7'))
         model.add(Dropout(0.5))
         model.add(Dense(self.nb_classes, activation='softmax'))
+
+        return model
