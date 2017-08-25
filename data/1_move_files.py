@@ -55,14 +55,14 @@ def move_files(file_groups):
 
             # Check if we have already moved this file, or at least that it
             # exists to move.
-            if not os.path.exists(filename):
+            if not os.path.exists(classname + '/' + filename):
                 print("Can't find %s to move. Skipping." % (filename))
                 continue
 
             # Move it.
             dest = group + '/' + classname + '/' + filename
-            print("Moving %s to %s" % (filename, dest))
-            os.rename(filename, dest)
+            print("Moving %s to %s" % (classname + '/' + filename, dest))
+            os.rename(classname + '/' + filename, dest)
 
     print("Done.")
 
