@@ -1,5 +1,5 @@
 """
-Train our RNN on bottlecap or prediction files generated from our CNN.
+Train our RNN on extracted features or images.
 """
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping, CSVLogger
 from models import ResearchModels
@@ -10,7 +10,7 @@ def train(data_type, seq_length, model, saved_model=None,
           concat=False, class_limit=None, image_shape=None,
           load_to_memory=False):
     # Set variables.
-    nb_epoch = 1000
+    nb_epoch = 1000000
     batch_size = 32
 
     # Helper: Save the model.
@@ -24,7 +24,7 @@ def train(data_type, seq_length, model, saved_model=None,
     tb = TensorBoard(log_dir='./data/logs')
 
     # Helper: Stop when we stop learning.
-    early_stopper = EarlyStopping(patience=10)
+    early_stopper = EarlyStopping(patience=100000)
 
     # Helper: Save results.
     timestamp = time.time()
@@ -50,8 +50,8 @@ def train(data_type, seq_length, model, saved_model=None,
 
     if load_to_memory:
         # Get data.
-        X, y = data.get_all_sequences_in_memory(batch_size, 'train', data_type, concat)
-        X_test, y_test = data.get_all_sequences_in_memory(batch_size, 'test', data_type, concat)
+        X, y = data.get_all_sequences_in_memory('train', data_type, concat)
+        X_test, y_test = data.get_all_sequences_in_memory('test', data_type, concat)
     else:
         # Get generators.
         generator = data.frame_generator(batch_size, 'train', data_type, concat)
@@ -69,7 +69,7 @@ def train(data_type, seq_length, model, saved_model=None,
             batch_size=batch_size,
             validation_data=(X_test, y_test),
             verbose=1,
-            callbacks=[checkpointer, tb, early_stopper, csv_logger],
+            callbacks=[tb, early_stopper, csv_logger],
             epochs=nb_epoch)
     else:
         # Use fit generator.
@@ -78,24 +78,26 @@ def train(data_type, seq_length, model, saved_model=None,
             steps_per_epoch=steps_per_epoch,
             epochs=nb_epoch,
             verbose=1,
-            callbacks=[checkpointer, tb, early_stopper, csv_logger],
+            callbacks=[tb, early_stopper, csv_logger],
             validation_data=val_generator,
             validation_steps=10)
 
 def main():
     """These are the main training settings. Set each before running
     this file."""
-    model = 'lstm'  # see `models.py` for more
+    model = 'conv_3d'  # see `models.py` for more
     saved_model = None  # None or weights file
-    class_limit = None  # int, can be 1-101 or None
+    class_limit = 2  # int, can be 1-101 or None
     seq_length = 40
     load_to_memory = True  # pre-load the sequences into memory
 
     # Chose images or features and image shape based on network.
-    if model == 'conv_3d' or model == 'crnn':
+    if model == 'conv_3d':
         data_type = 'images'
         image_shape = (80, 80, 3)
-        load_to_memory = False
+    elif model == 'lrcn':
+        data_type = 'image'
+        image_shape = (150, 150, 3)
     else:
         data_type = 'features'
         image_shape = None

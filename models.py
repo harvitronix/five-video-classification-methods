@@ -4,7 +4,7 @@ A collection of models we'll use to attempt to classify videos.
 from keras.layers import Dense, Flatten, Dropout, ZeroPadding3D
 from keras.layers.recurrent import LSTM
 from keras.models import Sequential, load_model
-from keras.optimizers import Adam
+from keras.optimizers import Adam, RMSprop
 from keras.layers.wrappers import TimeDistributed
 from keras.layers.convolutional import (Conv2D, MaxPooling3D, Conv3D,
     MaxPooling2D)
@@ -17,7 +17,7 @@ class ResearchModels():
         """
         `model` = one of:
             lstm
-            crnn
+            lcrn
             mlp
             conv_3d
         `nb_classes` = the number of classes to predict
@@ -45,10 +45,10 @@ class ResearchModels():
             print("Loading LSTM model.")
             self.input_shape = (seq_length, features_length)
             self.model = self.lstm()
-        elif model == 'crnn':
-            print("Loading CRNN model.")
-            self.input_shape = (seq_length, 80, 80, 3)
-            self.model = self.crnn()
+        elif model == 'lrcn':
+            print("Loading CNN-LSTM model.")
+            self.input_shape = (seq_length, 150, 150, 3)
+            self.model = self.lrcn()
         elif model == 'mlp':
             print("Loading simple MLP.")
             self.input_shape = features_length * seq_length
@@ -66,9 +66,11 @@ class ResearchModels():
             sys.exit()
 
         # Now compile the network.
-        optimizer = Adam(lr=1e-5)
+        optimizer = Adam(lr=1e-4, decay=1e-6)
         self.model.compile(loss='categorical_crossentropy', optimizer=optimizer,
                            metrics=metrics)
+
+        print(self.model.summary())
 
     def lstm(self):
         """Build a simple LSTM network. We pass the extracted features from
@@ -84,46 +86,54 @@ class ResearchModels():
 
         return model
 
-    def crnn(self):
+    def lrcn(self):
         """Build a CNN into RNN.
         Starting version from:
-        https://github.com/udacity/self-driving-car/blob/master/
-            steering-models/community-models/chauffeur/models.py
+            https://github.com/udacity/self-driving-car/blob/master/
+                steering-models/community-models/chauffeur/models.py
+
+        Heavily influenced by VGG-16:
+            https://arxiv.org/abs/1409.1556
+
+        Also known as an LRCN:
+            https://arxiv.org/pdf/1411.4389.pdf
         """
         model = Sequential()
+
+        model.add(TimeDistributed(Conv2D(32, (7, 7), strides=(2, 2),
+            activation='relu', padding='same'), input_shape=self.input_shape))
         model.add(TimeDistributed(Conv2D(32, (3,3),
-            kernel_initializer="he_normal",
-            activation='relu'), input_shape=self.input_shape))
-        model.add(TimeDistributed(Conv2D(32, (3,3),
-            kernel_initializer="he_normal",
-            activation='relu')))
-        model.add(TimeDistributed(MaxPooling2D()))
-        model.add(TimeDistributed(Conv2D(48, (3,3),
-            kernel_initializer="he_normal",
-            activation='relu')))
-        model.add(TimeDistributed(Conv2D(48, (3,3),
-            kernel_initializer="he_normal",
-            activation='relu')))
-        model.add(TimeDistributed(MaxPooling2D()))
+            kernel_initializer="he_normal", activation='relu')))
+        model.add(TimeDistributed(MaxPooling2D((2, 2), strides=(2, 2))))
+
         model.add(TimeDistributed(Conv2D(64, (3,3),
-            kernel_initializer="he_normal",
-            activation='relu')))
+            padding='same', activation='relu')))
         model.add(TimeDistributed(Conv2D(64, (3,3),
-            kernel_initializer="he_normal",
-            activation='relu')))
-        model.add(TimeDistributed(MaxPooling2D()))
+            padding='same', activation='relu')))
+        model.add(TimeDistributed(MaxPooling2D((2, 2), strides=(2, 2))))
+
         model.add(TimeDistributed(Conv2D(128, (3,3),
-            kernel_initializer="he_normal",
-            activation='relu')))
+            padding='same', activation='relu')))
         model.add(TimeDistributed(Conv2D(128, (3,3),
-            kernel_initializer="he_normal",
-            activation='relu')))
-        model.add(TimeDistributed(MaxPooling2D()))
+            padding='same', activation='relu')))
+        model.add(TimeDistributed(MaxPooling2D((2, 2), strides=(2, 2))))
+
+        model.add(TimeDistributed(Conv2D(256, (3,3),
+            padding='same', activation='relu')))
+        model.add(TimeDistributed(Conv2D(256, (3,3),
+            padding='same', activation='relu')))
+        model.add(TimeDistributed(MaxPooling2D((2, 2), strides=(2, 2))))
+        
+        model.add(TimeDistributed(Conv2D(512, (3,3),
+            padding='same', activation='relu')))
+        model.add(TimeDistributed(Conv2D(512, (3,3),
+            padding='same', activation='relu')))
+        model.add(TimeDistributed(MaxPooling2D((2, 2), strides=(2, 2))))
+
         model.add(TimeDistributed(Flatten()))
-        model.add(LSTM(256, return_sequences=True))
-        model.add(Flatten())
-        model.add(Dense(512))
-        model.add(Dropout(0.5))
+
+        model.add(Dropout(0.9))
+        model.add(LSTM(256, return_sequences=False, dropout=0.9))
         model.add(Dense(self.nb_classes, activation='softmax'))
 
         return model
@@ -148,18 +158,23 @@ class ResearchModels():
         # Model.
         model = Sequential()
         model.add(Conv3D(
-            32, (7,7,7), activation='relu', input_shape=self.input_shape
+            32, (3,3,3), activation='relu', input_shape=self.input_shape
         ))
         model.add(MaxPooling3D(pool_size=(1, 2, 2), strides=(1, 2, 2)))
         model.add(Conv3D(64, (3,3,3), activation='relu'))
         model.add(MaxPooling3D(pool_size=(1, 2, 2), strides=(1, 2, 2)))
-        model.add(Conv3D(128, (2,2,2), activation='relu'))
+        model.add(Conv3D(128, (3,3,3), activation='relu'))
+        model.add(Conv3D(128, (3,3,3), activation='relu'))
         model.add(MaxPooling3D(pool_size=(1, 2, 2), strides=(1, 2, 2)))
+        model.add(Conv3D(256, (2,2,2), activation='relu'))
+        model.add(Conv3D(256, (2,2,2), activation='relu'))
+        model.add(MaxPooling3D(pool_size=(1, 2, 2), strides=(1, 2, 2)))
+
         model.add(Flatten())
-        model.add(Dense(256))
-        model.add(Dropout(0.2))
-        model.add(Dense(256))
-        model.add(Dropout(0.2))
+        model.add(Dense(1024))
+        model.add(Dropout(0.5))
+        model.add(Dense(1024))
+        model.add(Dropout(0.5))
         model.add(Dense(self.nb_classes, activation='softmax'))
 
         return model
