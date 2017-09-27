@@ -65,26 +65,26 @@ def get_model(weights='imagenet'):
     x = GlobalAveragePooling2D()(x)
     # let's add a fully-connected layer
     x = Dense(1024, activation='relu')(x)
-    # and a logistic layer -- let's say we have 2 classes
+    # and a logistic layer
     predictions = Dense(len(data.classes), activation='softmax')(x)
 
     # this is the model we will train
     model = Model(inputs=base_model.input, outputs=predictions)
     return model
 
-def get_top_layer_model(base_model):
+def freeze_all_but_top(model):
     """Used to train just the top layers of the model."""
     # first: train only the top layers (which were randomly initialized)
     # i.e. freeze all convolutional InceptionV3 layers
-    for layer in base_model.layers:
+    for layer in model.layers[:-2]:
         layer.trainable = False
 
     # compile the model (should be done *after* setting layers to non-trainable)
-    base_model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
 
-    return base_model
+    return model
 
-def get_mid_layer_model(model):
+def freeze_all_but_mid_and_top(model):
     """After we fine-tune the dense layers, train deeper."""
     # we chose to train the top 2 inception blocks, i.e. we will freeze
     # the first 172 layers and unfreeze the rest:
@@ -120,14 +120,14 @@ def main(weights_file):
     if weights_file is None:
         print("Loading network from ImageNet weights.")
         # Get and train the top layers.
-        model = get_top_layer_model(model)
+        model = freeze_all_but_top(model)
         model = train_model(model, 10, generators)
     else:
         print("Loading saved model: %s." % weights_file)
         model.load_weights(weights_file)
 
     # Get and train the mid layers.
-    model = get_mid_layer_model(model)
+    model = freeze_all_but_mid_and_top(model)
     model = train_model(model, 1000, generators,
                         [checkpointer, early_stopper, tensorboard])
 
