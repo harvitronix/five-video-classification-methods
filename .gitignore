@@ -10,3 +10,4 @@ data/checkpoints/*
 data/sequences/*
 data/train/*
 data/test/*
+data/c3d/*
