@@ -57,10 +57,6 @@ class ResearchModels():
             print("Loading Conv3D")
             self.input_shape = (seq_length, 80, 80, 3)
             self.model = self.conv_3d()
-        elif model == 'stateful_lrcn':
-            print("Loading stateful LRCN")
-            self.input_shape = (150, 150, 3)
-            self.model = self.stateful_lrcn()
         else:
             print("Unknown network.")
             sys.exit()
@@ -176,45 +172,6 @@ class ResearchModels():
         model.add(Dense(1024))
         model.add(Dropout(0.5))
         model.add(Dense(self.nb_classes, activation='softmax'))
-
-        return model
-
-    def stateful_lrcn(self):
-        """Build a CNN into RNN using single frames and a stateful RNN.
-
-        This will require we use a sequence size of 1 and manage the state
-        manually. The goal of this setup is to allow us to use a much larger
-        CNN (like VGG16) and pretrained weights. We do this instead of
-        Time Distributed in an effort to combat our major GPU memory
-        constraints.
-
-        Uses VGG-16:
-            https://arxiv.org/abs/1409.1556
-
-        This architecture is also known as an LRCN:
-            https://arxiv.org/pdf/1411.4389.pdf
-        """
-        from keras.applications.vgg16 import VGG16
-        from keras.models import Model
-
-        base_model = VGG16(weights='imagenet', include_top=False,
-                           input_shape=self.input_shape)
-        x = base_model.output
-
-        # Maybe?
-        # x = GlobalAveragePooling2D()(x)
-
-        x = Flatten()(x)
-
-        # Turn the CNN output into a "sequence" of length 1
-        x = Reshape((1, -1))(x)  
-
-        # Add the LSTM.
-        x = LSTM(256, batch_input_shape=(1, 1, -1), stateful=True, dropout=0.9)(x)
-
-        predictions = Dense(self.nb_classes, activation='softmax')(x)
-
-        model = Model(inputs=base_model.input, outputs=predictions)
 
         return model
 
