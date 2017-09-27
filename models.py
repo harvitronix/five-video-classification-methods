@@ -1,11 +1,7 @@
 """
 A collection of models we'll use to attempt to classify videos.
 """
-<<<<<<< HEAD
-from keras.layers import Dense, Flatten, Dropout, Reshape, Input
-=======
 from keras.layers import Dense, Flatten, Dropout, ZeroPadding3D
->>>>>>> master
 from keras.layers.recurrent import LSTM
 from keras.models import Sequential, load_model
 from keras.optimizers import Adam, RMSprop
@@ -70,11 +66,7 @@ class ResearchModels():
             sys.exit()
 
         # Now compile the network.
-<<<<<<< HEAD
-        optimizer = Adam(lr=0.00001, decay=1e-6)
-=======
-        optimizer = Adam(lr=1e-5)
->>>>>>> master
+        optimizer = Adam(lr=1e-4, decay=1e-6)
         self.model.compile(loss='categorical_crossentropy', optimizer=optimizer,
                            metrics=metrics)
 
