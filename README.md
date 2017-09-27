@@ -38,13 +38,17 @@ Now you can run the scripts in the data folder to move the videos to the appropr
 
 Before you can run Methods #4 and #5, you need to extract features from the images with the CNN. This is done by running `extract_features.py`. On my Dell with a GeFore 960m GPU, this takes about 8 hours. If you want to limit to just the first N classes, you can set that option in the file.
 
-## Running models
+## Training models
 
 The CNN-only method (method #1 in the blog post) is run from `train_cnn.py`.
 
 The rest of the models are run from `train.py`. There are configuration options you can set in that file to choose which model you want to run.
 
 The models are all defined in `models.py`. Reference that file to see which models you are able to run in `train.py`.
+
+## Demo/Using models
+
+I have not yet implemented a demo where you can pass a video file to a model and get a prediction. Pull requests are welcome if you'd like to help out!
 
 ### UCF101 Citation
 
