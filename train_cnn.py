@@ -74,10 +74,9 @@ def get_model(weights='imagenet'):
 
 def freeze_all_but_top(model):
     """Used to train just the top layers of the model."""
-    print(model.summary())
     # first: train only the top layers (which were randomly initialized)
     # i.e. freeze all convolutional InceptionV3 layers
-    for layer in model.layers:
+    for layer in model.layers[:-2]:
         layer.trainable = False
 
     # compile the model (should be done *after* setting layers to non-trainable)
