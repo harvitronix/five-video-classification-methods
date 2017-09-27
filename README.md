@@ -16,6 +16,8 @@ This code requires you have Keras 2 and TensorFlow 1 or greater installed. Pleas
 
 `pip install -r requirements.txt`
 
+You must also have `ffmpeg` installed in order to extract the video files. If `ffmpeg` isn't in your system path (ie. `which ffmpeg` doesn't return its path, or you're on an OS other than *nix), you'll need to update the path to `ffmpeg` in `data/2_extract_files.py`.
+
 ## Getting the data
 
 First, download the dataset from UCF into the `data` folder:
