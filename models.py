@@ -132,8 +132,8 @@ class ResearchModels():
 
         model.add(TimeDistributed(Flatten()))
 
-        model.add(Dropout(0.9))
-        model.add(LSTM(256, return_sequences=False, dropout=0.9))
+        model.add(Dropout(0.5))
+        model.add(LSTM(256, return_sequences=False, dropout=0.5))
         model.add(Dense(self.nb_classes, activation='softmax'))
 
         return model
