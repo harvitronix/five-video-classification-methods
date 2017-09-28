@@ -17,7 +17,7 @@ class ResearchModels():
         """
         `model` = one of:
             lstm
-            lcrn
+            lrcn
             mlp
             conv_3d
         `nb_classes` = the number of classes to predict
