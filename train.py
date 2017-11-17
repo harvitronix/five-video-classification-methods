@@ -97,7 +97,7 @@ def main():
         data_type = 'images'
         image_shape = (80, 80, 3)
     elif model == 'lrcn':
-        data_type = 'image'
+        data_type = 'images'
         image_shape = (150, 150, 3)
     else:
         data_type = 'features'
