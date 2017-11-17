@@ -14,12 +14,13 @@ from keras.models import Model
 from keras.layers import Dense, GlobalAveragePooling2D
 from keras.callbacks import ModelCheckpoint, TensorBoard, EarlyStopping
 from data import DataSet
+import os.path
 
 data = DataSet()
 
 # Helper: Save the model.
 checkpointer = ModelCheckpoint(
-    filepath='./data/checkpoints/inception.{epoch:03d}-{val_loss:.2f}.hdf5',
+    filepath=os.path.join('data', 'checkpoints', 'inception.{epoch:03d}-{val_loss:.2f}.hdf5',)
     verbose=1,
     save_best_only=True)
 
@@ -27,7 +28,7 @@ checkpointer = ModelCheckpoint(
 early_stopper = EarlyStopping(patience=10)
 
 # Helper: TensorBoard
-tensorboard = TensorBoard(log_dir='./data/logs/')
+tensorboard = TensorBoard(log_dir=os.path.join('data', 'logs'))
 
 def get_generators():
     train_datagen = ImageDataGenerator(
@@ -41,14 +42,14 @@ def get_generators():
     test_datagen = ImageDataGenerator(rescale=1./255)
 
     train_generator = train_datagen.flow_from_directory(
-        './data/train/',
+        os.path.join('data', 'train'),
         target_size=(299, 299),
         batch_size=32,
         classes=data.classes,
         class_mode='categorical')
 
     validation_generator = test_datagen.flow_from_directory(
-        './data/test/',
+        os.path.join('data', 'test'),
         target_size=(299, 299),
         batch_size=32,
         classes=data.classes,
