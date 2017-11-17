@@ -5,6 +5,7 @@ import numpy as np
 import operator
 import random
 import glob
+import os.path
 from data import DataSet
 from processor import process_image
 from keras.models import load_model
@@ -15,7 +16,7 @@ def main(nb_images=5):
     model = load_model('data/checkpoints/inception.057-1.16.hdf5')
 
     # Get all our test images.
-    images = glob.glob('./data/test/**/*.jpg')
+    images = glob.glob(os.path.join('data', 'test', '**', '*.jpg'))
 
     for _ in range(nb_images):
         print('-'*80)

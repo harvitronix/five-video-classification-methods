@@ -22,7 +22,7 @@ class DataSet():
         """
         self.seq_length = seq_length
         self.class_limit = class_limit
-        self.sequence_path = './data/sequences/'
+        self.sequence_path = os.path.join('data', 'sequences')
         self.max_frames = 300  # max number of frames a video can have for us to use it
 
         # Get the data.
@@ -39,7 +39,7 @@ class DataSet():
     @staticmethod
     def get_data():
         """Load our data from file."""
-        with open('./data/data_file.csv', 'r') as fin:
+        with open(os.path.join('data', 'data_file.csv'), 'r') as fin:
             reader = csv.reader(fin)
             data = list(reader)
 
@@ -203,14 +203,14 @@ class DataSet():
     def get_frames_for_sample(sample):
         """Given a sample row from the data file, get all the corresponding frame
         filenames."""
-        path = './data/' + sample[0] + '/' + sample[1] + '/'
+        path = os.path.join('data', sample[0], sample[1])
         filename = sample[2]
-        images = sorted(glob.glob(path + filename + '*jpg'))
+        images = sorted(glob.glob(os.path.join(path, filename + '*jpg')))
         return images
 
     @staticmethod
     def get_filename_from_image(filename):
-        parts = filename.split('/')
+        parts = filename.split(os.path.sep)
         return parts[-1].replace('.jpg', '')
 
     @staticmethod
