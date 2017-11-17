@@ -47,7 +47,7 @@ class ResearchModels():
             self.model = self.lstm()
         elif model == 'lrcn':
             print("Loading CNN-LSTM model.")
-            self.input_shape = (seq_length, 150, 150, 3)
+            self.input_shape = (seq_length, 80, 80, 3)
             self.model = self.lrcn()
         elif model == 'mlp':
             print("Loading simple MLP.")
@@ -66,7 +66,7 @@ class ResearchModels():
             sys.exit()
 
         # Now compile the network.
-        optimizer = Adam(lr=1e-4, decay=1e-6)
+        optimizer = Adam(lr=1e-5, decay=1e-6)
         self.model.compile(loss='categorical_crossentropy', optimizer=optimizer,
                            metrics=metrics)
 

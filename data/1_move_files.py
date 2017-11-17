@@ -13,8 +13,8 @@ def get_train_test_lists(version='01'):
     breakdowns we'll later use to move everything.
     """
     # Get our files based on version.
-    test_file = './ucfTrainTestlist/testlist' + version + '.txt'
-    train_file = './ucfTrainTestlist/trainlist' + version + '.txt'
+    test_file = os.path.join('ucfTrainTestlist', 'testlist' + version + '.txt')
+    train_file = os.path.join('ucfTrainTestlist', 'trainlist' + version + '.txt')
 
     # Build the test list.
     with open(test_file) as fin:
@@ -44,14 +44,14 @@ def move_files(file_groups):
         for video in videos:
 
             # Get the parts.
-            parts = video.split('/')
+            parts = video.split(os.path.sep)
             classname = parts[0]
             filename = parts[1]
 
             # Check if this class exists.
-            if not os.path.exists(group + '/' + classname):
+            if not os.path.exists(os.path.join(group, classname)):
                 print("Creating folder for %s/%s" % (group, classname))
-                os.makedirs(group + '/' + classname)
+                os.makedirs(os.path.join(group, classname))
 
             # Check if we have already moved this file, or at least that it
             # exists to move.
@@ -60,7 +60,7 @@ def move_files(file_groups):
                 continue
 
             # Move it.
-            dest = group + '/' + classname + '/' + filename
+            dest = os.path.join(group, classname, filename)
             print("Moving %s to %s" % (filename, dest))
             os.rename(filename, dest)
 
