@@ -25,13 +25,13 @@ def extract_files():
     `ffmpeg -i video.mpg image-%04d.jpg`
     """
     data_file = []
-    folders = ['./train/', './test/']
+    folders = ['train', 'test']
 
     for folder in folders:
-        class_folders = glob.glob(folder + '*')
+        class_folders = glob.glob(os.path.join(folder, '*'))
 
         for vid_class in class_folders:
-            class_files = glob.glob(vid_class + '/*.avi')
+            class_files = glob.glob(os.path.join(vid_class, '*.avi'))
 
             for video_path in class_files:
                 # Get the parts of the file.
@@ -43,10 +43,9 @@ def extract_files():
                 # the info.
                 if not check_already_extracted(video_parts):
                     # Now extract it.
-                    src = train_or_test + '/' + classname + '/' + \
-                        filename
-                    dest = train_or_test + '/' + classname + '/' + \
-                        filename_no_ext + '-%04d.jpg'
+                    src = os.path.join(train_or_test, classname, filename)
+                    dest = os.path.join(train_or_test, classname,
+                        filename_no_ext + '-%04d.jpg')
                     call(["ffmpeg", "-i", src, dest])
 
                 # Now get how many frames it is.
@@ -66,25 +65,25 @@ def get_nb_frames_for_video(video_parts):
     """Given video parts of an (assumed) already extracted video, return
     the number of frames that were extracted."""
     train_or_test, classname, filename_no_ext, _ = video_parts
-    generated_files = glob.glob(train_or_test + '/' + classname + '/' +
-                                filename_no_ext + '*.jpg')
+    generated_files = glob.glob(os.path.join(train_or_test, classname,
+                                filename_no_ext + '*.jpg'))
     return len(generated_files)
 
 def get_video_parts(video_path):
     """Given a full path to a video, return its parts."""
-    parts = video_path.split('/')
-    filename = parts[3]
+    parts = video_path.split(os.path.sep)
+    filename = parts[2]
     filename_no_ext = filename.split('.')[0]
-    classname = parts[2]
-    train_or_test = parts[1]
+    classname = parts[1]
+    train_or_test = parts[0]
 
     return train_or_test, classname, filename_no_ext, filename
 
 def check_already_extracted(video_parts):
     """Check to see if we created the -0001 frame of this file."""
     train_or_test, classname, filename_no_ext, _ = video_parts
-    return bool(os.path.exists(train_or_test + '/' + classname +
-                               '/' + filename_no_ext + '-0001.jpg'))
+    return bool(os.path.exists(os.path.join(train_or_test, classname,
+                               filename_no_ext + '-0001.jpg')))
 
 def main():
     """
