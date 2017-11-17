@@ -5,6 +5,7 @@ from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping, CSVLogg
 from models import ResearchModels
 from data import DataSet
 import time
+import os.path
 
 def train(data_type, seq_length, model, saved_model=None,
           concat=False, class_limit=None, image_shape=None,
@@ -15,21 +16,21 @@ def train(data_type, seq_length, model, saved_model=None,
 
     # Helper: Save the model.
     checkpointer = ModelCheckpoint(
-        filepath='./data/checkpoints/' + model + '-' + data_type + \
-            '.{epoch:03d}-{val_loss:.3f}.hdf5',
+        filepath=os.path.join('data', 'checkpoints', + model + '-' + data_type + \
+            '.{epoch:03d}-{val_loss:.3f}.hdf5'),
         verbose=1,
         save_best_only=True)
 
     # Helper: TensorBoard
-    tb = TensorBoard(log_dir='./data/logs')
+    tb = TensorBoard(log_dir=os.path.join('data', 'logs')
 
     # Helper: Stop when we stop learning.
     early_stopper = EarlyStopping(patience=100000)
 
     # Helper: Save results.
     timestamp = time.time()
-    csv_logger = CSVLogger('./data/logs/' + model + '-' + 'training-' + \
-        str(timestamp) + '.log')
+    csv_logger = CSVLogger(os.path.join('data', 'logs', + model + '-' + 'training-' + \
+        str(timestamp) + '.log'))
 
     # Get the data and process it.
     if image_shape is None:
@@ -85,7 +86,7 @@ def train(data_type, seq_length, model, saved_model=None,
 def main():
     """These are the main training settings. Set each before running
     this file."""
-    model = 'conv_3d'  # see `models.py` for more
+    model = 'lrcn'  # see `models.py` for more
     saved_model = None  # None or weights file
     class_limit = 2  # int, can be 1-101 or None
     seq_length = 40
