@@ -46,11 +46,22 @@ The rest of the models are run from `train.py`. There are configuration options 
 
 The models are all defined in `models.py`. Reference that file to see which models you are able to run in `train.py`.
 
+Training logs are saved to CSV and also to TensorBoard files. To see progress while training, run `tensorboard --logdir=data/logs` from the project root folder.
+
 ## Demo/Using models
 
 I have not yet implemented a demo where you can pass a video file to a model and get a prediction. Pull requests are welcome if you'd like to help out!
 
-### UCF101 Citation
+## TODO
+
+- [ ] Add data augmentation to fight overfitting
+- [ ] Support multiple workers in the data generator for faster training
+- [ ] Add a demo script
+- [ ] Support other datasets
+- [ ] Implement optical flow
+- [ ] Implement more complex network architectures, like optical flow/CNN fusion
+
+## UCF101 Citation
 
 Khurram Soomro, Amir Roshan Zamir and Mubarak Shah, UCF101: A Dataset of 101 Human Action Classes From Videos in The Wild., CRCV-TR-12-01, November, 2012. 
 
