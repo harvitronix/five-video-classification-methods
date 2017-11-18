@@ -82,9 +82,9 @@ def train(data_type, seq_length, model, saved_model=None,
 def main():
     """These are the main training settings. Set each before running
     this file."""
-    model = 'lrcn'  # see `models.py` for more
+    model = 'lstm'  # see `models.py` for more
     saved_model = None  # None or weights file
-    class_limit = 10  # int, can be 1-101 or None
+    class_limit = 2  # int, can be 1-101 or None
     seq_length = 40
     load_to_memory = False  # pre-load the sequences into memory
     batch_size = 32
