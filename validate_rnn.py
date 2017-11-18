@@ -7,7 +7,7 @@ from models import ResearchModels
 from data import DataSet
 
 def validate(data_type, model, seq_length=40, saved_model=None,
-             concat=False, class_limit=None, image_shape=None):
+             class_limit=None, image_shape=None):
     batch_size = 32
 
     # Get the data and process it.
@@ -23,7 +23,7 @@ def validate(data_type, model, seq_length=40, saved_model=None,
             image_shape=image_shape
         )
 
-    val_generator = data.frame_generator(batch_size, 'test', data_type, concat)
+    val_generator = data.frame_generator(batch_size, 'test', data_type)
 
     # Get the model.
     rm = ResearchModels(len(data.classes), model, seq_length, saved_model)
@@ -47,13 +47,8 @@ def main():
         data_type = 'features'
         image_shape = None
 
-    if model == 'mlp':
-        concat = True
-    else:
-        concat = False
-
     validate(data_type, model, saved_model=saved_model,
-             concat=concat, image_shape=image_shape)
+             image_shape=image_shape)
 
 if __name__ == '__main__':
     main()

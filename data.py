@@ -95,7 +95,7 @@ class DataSet():
                 test.append(item)
         return train, test
 
-    def get_all_sequences_in_memory(self, train_test, data_type, concat=False):
+    def get_all_sequences_in_memory(self, train_test, data_type):
         """
         This is a mirror of our generator, but attempts to load everything into
         memory so we can train way faster.
@@ -123,17 +123,12 @@ class DataSet():
                     print("Can't find sequence. Did you generate them?")
                     raise
 
-                if concat:
-                    # We want to pass the sequence back as a single array. This
-                    # is used to pass into a CNN or MLP, rather than an RNN.
-                    sequence = np.concatenate(sequence).ravel()
-
             X.append(sequence)
             y.append(self.get_class_one_hot(row[1]))
 
         return np.array(X), np.array(y)
 
-    def frame_generator(self, batch_size, train_test, data_type, concat=False):
+    def frame_generator(self, batch_size, train_test, data_type):
         """Return a generator that we can use to train on. There are
         a couple different things we can return:
 
@@ -168,14 +163,8 @@ class DataSet():
                     # Get the sequence from disk.
                     sequence = self.get_extracted_sequence(data_type, sample)
 
-                if sequence is None:
-                    print("Can't find sequence. Did you generate them?")
-                    sys.exit()  # TODO this should raise
-
-                if concat:
-                    # We want to pass the sequence back as a single array. This
-                    # is used to pass into an MLP rather than an RNN.
-                    sequence = np.concatenate(sequence).ravel()
+                    if sequence is None:
+                        raise ValueError("Can't find sequence. Did you generate them?")
 
                 X.append(sequence)
                 y.append(self.get_class_one_hot(sample[1]))

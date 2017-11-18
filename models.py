@@ -20,6 +20,7 @@ class ResearchModels():
             lrcn
             mlp
             conv_3d
+            c3d
         `nb_classes` = the number of classes to predict
         `seq_length` = the length of our video sequences
         `saved_model` = the path to a saved Keras model to load
@@ -51,7 +52,7 @@ class ResearchModels():
             self.model = self.lrcn()
         elif model == 'mlp':
             print("Loading simple MLP.")
-            self.input_shape = features_length * seq_length
+            self.input_shape = (seq_length, features_length)
             self.model = self.mlp()
         elif model == 'conv_3d':
             print("Loading Conv3D")
@@ -139,10 +140,12 @@ class ResearchModels():
         return model
 
     def mlp(self):
-        """Build a simple MLP."""
+        """Build a simple MLP. It uses extracted features as the input
+        because of the otherwise too-high dimensionality."""
         # Model.
         model = Sequential()
-        model.add(Dense(512, input_dim=self.input_shape))
+        model.add(Flatten(input_shape=self.input_shape))
+        model.add(Dense(512))
         model.add(Dropout(0.5))
         model.add(Dense(512))
         model.add(Dropout(0.5))
