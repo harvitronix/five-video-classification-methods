@@ -1,5 +1,5 @@
 """
-Class for managing data.
+Class for managing our data.
 """
 import csv
 import numpy as np
@@ -8,8 +8,27 @@ import glob
 import os.path
 import sys
 import operator
+import threading
 from processor import process_image
 from keras.utils import np_utils
+
+class threadsafe_iterator:
+    def __init__(self, iterator):
+        self.iterator = iterator
+        self.lock = threading.Lock()
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        with self.lock:
+            return next(self.iterator)
+
+def threadsafe_generator(func):
+    """Decorator"""
+    def gen(*a, **kw):
+        return threadsafe_iterator(func(*a, **kw))
+    return gen
 
 class DataSet():
 
@@ -128,6 +147,7 @@ class DataSet():
 
         return np.array(X), np.array(y)
 
+    @threadsafe_generator
     def frame_generator(self, batch_size, train_test, data_type):
         """Return a generator that we can use to train on. There are
         a couple different things we can return:

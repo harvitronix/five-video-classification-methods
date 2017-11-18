@@ -77,13 +77,14 @@ def train(data_type, seq_length, model, saved_model=None,
             verbose=1,
             callbacks=[tb, early_stopper, csv_logger, checkpointer],
             validation_data=val_generator,
-            validation_steps=40)
+            validation_steps=40,
+            workers=4)
 
 def main():
     """These are the main training settings. Set each before running
     this file."""
     # model can be one of lstm, lrcn, mlp, conv_3d, c3d
-    model = 'mlp'
+    model = 'lstm'
     saved_model = None  # None or weights file
     class_limit = 2  # int, can be 1-101 or None
     seq_length = 40
