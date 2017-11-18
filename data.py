@@ -1,5 +1,5 @@
 """
-Class for managing our data.
+Class for managing data.
 """
 import csv
 import numpy as np
