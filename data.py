@@ -6,7 +6,6 @@ import numpy as np
 import random
 import glob
 import os.path
-import pandas as pd
 import sys
 import operator
 from processor import process_image
@@ -179,12 +178,10 @@ class DataSet():
     def get_extracted_sequence(self, data_type, sample):
         """Get the saved extracted features."""
         filename = sample[2]
-        path = self.sequence_path + filename + '-' + str(self.seq_length) + \
-            '-' + data_type + '.txt'
+        path = os.path.join(self.sequence_path, filename + '-' + str(self.seq_length) + \
+            '-' + data_type + '.npy')
         if os.path.isfile(path):
-            # Use a dataframe/read_csv for speed increase over numpy.
-            features = pd.read_csv(path, sep=" ", header=None)
-            return features.values
+            return np.load(path)
         else:
             return None
 

@@ -18,7 +18,7 @@ def train(data_type, seq_length, model, saved_model=None,
         save_best_only=True)
 
     # Helper: TensorBoard
-    tb = TensorBoard(log_dir=os.path.join('data', 'logs'))
+    tb = TensorBoard(log_dir=os.path.join('data', 'logs', model))
 
     # Helper: Stop when we stop learning.
     early_stopper = EarlyStopping(patience=5)
@@ -83,7 +83,7 @@ def main():
     """These are the main training settings. Set each before running
     this file."""
     # model can be one of lstm, lrcn, mlp, conv_3d, c3d
-    model = 'mlp'  # see `models.py` for more
+    model = 'mlp'
     saved_model = None  # None or weights file
     class_limit = 2  # int, can be 1-101 or None
     seq_length = 40
