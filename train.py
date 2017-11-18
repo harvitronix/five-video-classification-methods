@@ -18,7 +18,7 @@ def train(data_type, seq_length, model, saved_model=None,
         save_best_only=True)
 
     # Helper: TensorBoard
-    tb = TensorBoard(log_dir=os.path.join('data', 'logs'))
+    tb = TensorBoard(log_dir=os.path.join('data', 'logs', model))
 
     # Helper: Stop when we stop learning.
     early_stopper = EarlyStopping(patience=5)
