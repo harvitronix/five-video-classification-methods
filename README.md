@@ -36,7 +36,7 @@ Now you can run the scripts in the data folder to move the videos to the appropr
 
 ## Extracting features
 
-Before you can run Methods #4 and #5, you need to extract features from the images with the CNN. This is done by running `extract_features.py`. On my Dell with a GeFore 960m GPU, this takes about 8 hours. If you want to limit to just the first N classes, you can set that option in the file.
+Before you can run the `lstm` and `mlp`, you need to extract features from the images with the CNN. This is done by running `extract_features.py`. On my Dell with a GeFore 960m GPU, this takes about 8 hours. If you want to limit to just the first N classes, you can set that option in the file.
 
 ## Training models
 
