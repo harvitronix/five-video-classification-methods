@@ -10,7 +10,7 @@ import sys
 import operator
 import threading
 from processor import process_image
-from keras.utils import np_utils
+from keras.utils import to_categorical
 
 class threadsafe_iterator:
     def __init__(self, iterator):
@@ -98,8 +98,7 @@ class DataSet():
         label_encoded = self.classes.index(class_str)
 
         # Now one-hot it.
-        label_hot = np_utils.to_categorical(label_encoded, len(self.classes))
-        label_hot = label_hot[0]  # just get a single row
+        label_hot = to_categorical(label_encoded, len(self.classes))
 
         return label_hot
 
