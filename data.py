@@ -100,6 +100,8 @@ class DataSet():
         # Now one-hot it.
         label_hot = to_categorical(label_encoded, len(self.classes))
 
+        assert len(label_hot) == len(self.classes)
+
         return label_hot
 
     def split_train_test(self):
