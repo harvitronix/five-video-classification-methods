@@ -19,7 +19,7 @@ from tqdm import tqdm
 
 # Set defaults.
 seq_length = 40
-class_limit = 2  # Number of classes to extract. Can be 1-101 or None for all.
+class_limit = None  # Number of classes to extract. Can be 1-101 or None for all.
 
 # Get the dataset.
 data = DataSet(seq_length=seq_length, class_limit=class_limit)
@@ -36,7 +36,7 @@ for video in data.data:
         '-features')  # numpy will auto-append .npy
 
     # Check if we already have it.
-    if os.path.isfile(path):
+    if os.path.isfile(path + '.npy'):
         pbar.update(1)
         continue
 
