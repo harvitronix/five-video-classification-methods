@@ -1,7 +1,7 @@
 config = {
     'batch_size': 16,
     'early_stopping': True,
-    'learning_rate': 1e-3,
+    'learning_rate': 1e-2,
     'nb_epoch': 1000,
     'optimizer': 'sgd',
     'patience': 5,

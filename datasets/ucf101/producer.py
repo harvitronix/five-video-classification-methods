@@ -35,6 +35,7 @@ class DataSet():
     def __init__(self, seq_length, nb_classes, input_shape):
         self.seq_length = seq_length
         self.class_limit = nb_classes
+
         # TODO This shouldn't be hard coded
         self.max_frames = 300  # max number of frames a video can have for us to use it
 
@@ -59,27 +60,19 @@ class DataSet():
 
         return data
 
+    def sample_filter(self, x):
+        return int(x[3]) >= self.seq_length and int(x[3]) <= self.max_frames \
+            and x[1] in self.classes
+
     def clean_data(self):
         """Limit samples to greater than the sequence length and fewer
         than N frames. Also limit it to classes we want to use."""
-        data_clean = []
-        for item in self.data:
-            if int(item[3]) >= self.seq_length and int(item[3]) <= self.max_frames \
-                    and item[1] in self.classes:
-                data_clean.append(item)
-
-        return data_clean
+        return list(filter(self.sample_filter, self.data))
 
     def get_classes(self):
         """Extract the classes from our data. If we want to limit them,
         only return the classes we need."""
-        classes = []
-        for item in self.data:
-            if item[1] not in classes:
-                classes.append(item[1])
-
-        # Sort them.
-        classes = sorted(classes)
+        classes = sorted(set([item[1] for item in self.data]))
 
         # Return.
         if self.class_limit is not None:
@@ -102,13 +95,9 @@ class DataSet():
 
     def split_train_test(self):
         """Split the data into train and test groups."""
-        train = []
-        test = []
-        for item in self.data:
-            if item[0] == 'train':
-                train.append(item)
-            else:
-                test.append(item)
+        # Two loops, only called twice and data is small.
+        train = list(filter(lambda x: x[0] == 'train', self.data))
+        test = list(filter(lambda x: x[0] == 'test', self.data))
         return train, test
 
     @threadsafe_generator
@@ -125,27 +114,23 @@ class DataSet():
         print("Creating %s generator with %d samples." % (train_test, len(data)))
 
         while 1:
-            X, y = [], []
+            x = np.zeros((batch_size, self.seq_length, *self.image_shape))
+            y = np.zeros((batch_size, len(self.classes)))
+            samples = random.sample(data, batch_size)
 
             # Generate batch_size samples.
-            for _ in range(batch_size):
-                # Reset to be safe.
-                sequence = None
-
-                # Get a random sample.
-                sample = random.choice(data)
-
+            for i, sample in enumerate(samples):
                 # Get and resample frames.
                 frames = self.get_frames_for_sample(sample)
-                frames = self.rescale_list(frames, self.seq_length)
+                sampled_frames = self.rescale_list(frames, self.seq_length)
 
                 # Build the image sequence
-                sequence = self.build_image_sequence(frames)
+                sequence = self.build_image_sequence(sampled_frames)
 
-                X.append(sequence)
-                y.append(self.get_class_one_hot(sample[1]))
+                x[i] = np.array(sequence)
+                y[i] = self.get_class_one_hot(sample[1])
 
-            yield np.array(X), np.array(y)
+            yield x, y
 
     def build_image_sequence(self, frames):
         """Given a set of frames (filenames), build our sequence."""
@@ -156,15 +141,9 @@ class DataSet():
         """Given a sample row from the data file, get all the corresponding frame
         filenames."""
         # TODO This shouldn't be hard coded
-        path = os.path.join('datasets', 'ucf101', sample[0], sample[1])
-        filename = sample[2]
-        images = sorted(glob.glob(os.path.join(path, filename + '*jpg')))
+        path = os.path.join('datasets', 'ucf101', sample[0], sample[1], sample[2] + '*jpg')
+        images = sorted(glob.glob(path))
         return images
-
-    @staticmethod
-    def get_filename_from_image(filename):
-        parts = filename.split(os.path.sep)
-        return parts[-1].replace('.jpg', '')
 
     @staticmethod
     def rescale_list(input_list, size):
