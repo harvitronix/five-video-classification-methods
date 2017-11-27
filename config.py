@@ -32,6 +32,14 @@ config = {
                 },
             ],
         },
+        'conv3d': {
+            'paths': [
+                {
+                    'preprocessing_steps': [],
+                    'input_shape': (80, 80, 3),
+                },
+            ],
+        },
     },
 
     'datasets': {

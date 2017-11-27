@@ -18,7 +18,7 @@ def model(nb_classes, input_shape):
     # Don't retrain the VGG
     cnn.trainable = False
 
-    net_input = Input(shape=(None,) +  input_shape, name='net_input')
+    net_input = Input(shape=input_shape, name='net_input')
 
     # Distribute the CNN over time.
     x = TimeDistributed(cnn)(net_input)

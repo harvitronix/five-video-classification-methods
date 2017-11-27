@@ -1,6 +1,3 @@
-"""
-A collection of models we'll use to attempt to classify videos.
-"""
 from keras.layers import Dense, Flatten, Dropout, ZeroPadding3D
 from keras.models import Sequential
 from keras.layers.convolutional import MaxPooling3D, Conv3D
