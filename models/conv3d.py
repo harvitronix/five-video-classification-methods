@@ -11,7 +11,7 @@ from keras.layers.convolutional import (Conv2D, MaxPooling3D, Conv3D,
 from collections import deque
 import sys
 
-class ResearchModels():
+class Models():
     def __init__(self, nb_classes, model, seq_length,
                  saved_model=None, features_length=2048):
         """
