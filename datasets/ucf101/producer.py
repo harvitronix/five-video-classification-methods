@@ -155,7 +155,8 @@ class DataSet():
     def get_frames_for_sample(sample):
         """Given a sample row from the data file, get all the corresponding frame
         filenames."""
-        path = os.path.join('data', sample[0], sample[1])
+        # TODO This shouldn't be hard coded
+        path = os.path.join('datasets', 'ucf101', sample[0], sample[1])
         filename = sample[2]
         images = sorted(glob.glob(os.path.join(path, filename + '*jpg')))
         return images

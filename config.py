@@ -1,22 +1,30 @@
 config = {
-    'batch_size': 32,
+    'batch_size': 16,
     'early_stopping': True,
-    'learning_rate': 1e-5,
+    'learning_rate': 1e-3,
     'nb_epoch': 1000,
-    'optimizer': 'adam',
+    'optimizer': 'sgd',
     'patience': 5,
-    'sequence_length': 40,
-    'steps_per_epoch': 1000,
-    'validation_steps': 40,
+    'sequence_length': 10,
+    'steps_per_epoch': 100,
+    'validation_steps': 20,
     'verbose': True,
     'workers': 4,
 
     'tensorboard_callback': True,
     'early_stopper_callback': True,
-    'checkpointer_callback': True,
+    'checkpointer_callback': False,
     
     'models': {
         'c3d': {
+            'paths': [
+                {
+                    'preprocessing_steps': [],
+                    'input_shape': (80, 80, 3),
+                },
+            ],
+        },
+        'vgg_rnn': {
             'paths': [
                 {
                     'preprocessing_steps': [],
