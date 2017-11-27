@@ -18,9 +18,9 @@ def model(nb_classes, input_shape):
     model.add(Conv3D(128, (3,3,3), activation='relu', border_mode='same'))
     model.add(Conv3D(128, (3,3,3), activation='relu', border_mode='same'))
     model.add(MaxPooling3D(pool_size=(1, 2, 2), strides=(2, 2, 2), border_mode='valid'))
-    model.add(Conv3D(256, (2,2,2), activation='relu', border_mode='same')))
-    model.add(Conv3D(256, (2,2,2), activation='relu', border_mode='same')))
-    model.add(MaxPooling3D(pool_size=(1, 2, 2), strides=(2, 2, 2), border_mode='valid')))
+    model.add(Conv3D(256, (2,2,2), activation='relu', border_mode='same'))
+    model.add(Conv3D(256, (2,2,2), activation='relu', border_mode='same'))
+    model.add(MaxPooling3D(pool_size=(1, 2, 2), strides=(2, 2, 2), border_mode='valid'))
 
     model.add(Flatten())
     model.add(Dense(512, activation='relu'))

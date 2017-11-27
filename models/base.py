@@ -4,6 +4,7 @@ Base function for retrieving and compiling a model.
 import models.c3d as c3d
 import models.vgg_rnn as vgg_rnn
 import models.conv3d as conv3d
+import models.lrcn as lrcn
 from keras.layers.recurrent import LSTM
 from keras.optimizers import Adam, SGD
 
@@ -32,6 +33,8 @@ def get_model(nb_classes, model_name, seq_length, optimizer,
         model = vgg_rnn.model(nb_classes, (seq_length, *input_shapes[0]))
     elif model_name == 'conv3d':
         model = conv3d.model(nb_classes, (seq_length, *input_shapes[0]))
+    elif model_name == 'lrcn':
+        model = lrcn.model(nb_classes, (seq_length, *input_shapes[0]))
     else:
         raise ValueError("Unknown network name.")
 
