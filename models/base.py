@@ -5,9 +5,8 @@ import models.c3d as c3d
 from keras.layers.recurrent import LSTM
 from keras.optimizers import Adam, RMSprop
 
-def get_model(nb_classes, model_name, seq_length, optimizer='adam',
-              learning_rate=1e-5, input_shapes=(80, 80, 3),
-              verbose=True):
+def get_model(nb_classes, model_name, seq_length, optimizer,
+              learning_rate, input_shapes, verbose):
     """
     `model` = one of:
         lstm
@@ -26,7 +25,7 @@ def get_model(nb_classes, model_name, seq_length, optimizer='adam',
         metrics.append('top_k_categorical_accuracy')
 
     if model_name == 'c3d':
-        model = c3d.model(nb_classes, input_shapes[0])
+        model = c3d.model(nb_classes, (seq_length,) + input_shapes[0])
     else:
         raise ValueError("Unknown network name.")
 

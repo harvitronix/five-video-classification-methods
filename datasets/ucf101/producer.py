@@ -9,7 +9,7 @@ import os.path
 import sys
 import operator
 import threading
-from processor import process_image
+from utils.processor import process_image
 from keras.utils import to_categorical
 from config import config
 
@@ -32,8 +32,7 @@ def threadsafe_generator(func):
     return gen
 
 class DataSet():
-
-    def __init__(self, seq_length=40, nb_classes, input_shape):
+    def __init__(self, seq_length, nb_classes, input_shape):
         self.seq_length = seq_length
         self.class_limit = nb_classes
         # TODO This shouldn't be hard coded
@@ -53,7 +52,8 @@ class DataSet():
     @staticmethod
     def get_data():
         """Load our data from file."""
-        with open(os.path.join('data', 'data_file.csv'), 'r') as fin:
+        # TODO Path shouldn't be hard coded
+        with open(os.path.join('datasets', 'ucf101', 'data_file.csv'), 'r') as fin:
             reader = csv.reader(fin)
             data = list(reader)
 

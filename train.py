@@ -14,18 +14,18 @@ import argparse
 def train(model, generators, run_label):
     train_gen, val_gen = generators
 
-    if not log_label:
-        log_label = str(time.time())
+    if not run_label:
+        run_label = str(time.time())
 
     callbacks = []
     if config['tensorboard_callback']:
-        callbacks.append(TensorBoard(log_dir=os.path.join('data', 'logs', log_label)))
-    if early_stopper_callback:
+        callbacks.append(TensorBoard(log_dir=os.path.join('data', 'logs', run_label)))
+    if config['early_stopper_callback']:
         callbacks.append(EarlyStopping(patience=config['patience']))
-    if checkpointer_callback:
+    if config['checkpointer_callback']:
         callbacks.append(
             ModelCheckpoint(
-                filepath=os.path.join('data', 'checkpoints', log_label + '.hdf5'),
+                filepath=os.path.join('data', 'checkpoints', run_label + '.hdf5'),
                 verbose=config['verbose'],
                 save_best_only=True
             )
@@ -37,9 +37,9 @@ def train(model, generators, run_label):
         epochs=config['nb_epoch'],
         verbose=config['verbose'],
         callbacks=callbacks,
-        validation_data=val_generator,
-        validation_steps=40,
-        workers=4)
+        validation_data=val_gen,
+        validation_steps=config['validation_steps'],
+        workers=config['workers'])
 
 
 def main(model_name, dataset, model_path=None, run_label=None):
