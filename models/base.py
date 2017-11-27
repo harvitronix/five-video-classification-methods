@@ -1,12 +1,11 @@
 """
 Base function for retrieving and compiling a model.
 """
-
 from keras.layers.recurrent import LSTM
 from keras.optimizers import Adam, RMSprop
 
 def get_model(nb_classes, model_name, seq_length, optimizer='adam',
-              learning_rate=1e-5, input_shape=(80, 80, 3), features_length=2048, 
+              learning_rate=1e-5, input_shape=(80, 80, 3),
               verbose=True):
     """
     `model` = one of:

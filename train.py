@@ -1,110 +1,82 @@
 """
 Train our RNN on extracted features or images.
 """
+from config import config
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping, CSVLogger
-from models import ResearchModels
-from data import DataSet
+from keras.models import load_model
+from models.base import get_model
+from datasets.base import get_dataset
 import time
 import os.path
+import argparse
 
-def train(data_type, seq_length, model, saved_model=None,
-          class_limit=None, image_shape=None,
-          load_to_memory=False, batch_size=32, nb_epoch=100):
-    # Helper: Save the model.
-    checkpointer = ModelCheckpoint(
-        filepath=os.path.join('data', 'checkpoints', model + '-' + data_type + \
-            '.{epoch:03d}-{val_loss:.3f}.hdf5'),
-        verbose=1,
-        save_best_only=True)
 
-    # Helper: TensorBoard
-    tb = TensorBoard(log_dir=os.path.join('data', 'logs', model))
+def train(model, generators, run_label):
+    train_gen, val_gen = generators
 
-    # Helper: Stop when we stop learning.
-    early_stopper = EarlyStopping(patience=5)
+    if not log_label:
+        log_label = str(time.time())
 
-    # Helper: Save results.
-    timestamp = time.time()
-    csv_logger = CSVLogger(os.path.join('data', 'logs', model + '-' + 'training-' + \
-        str(timestamp) + '.log'))
-
-    # Get the data and process it.
-    if image_shape is None:
-        data = DataSet(
-            seq_length=seq_length,
-            class_limit=class_limit
-        )
-    else:
-        data = DataSet(
-            seq_length=seq_length,
-            class_limit=class_limit,
-            image_shape=image_shape
+    callbacks = []
+    if config['tensorboard_callback']:
+        callbacks.append(TensorBoard(log_dir=os.path.join('data', 'logs', log_label)))
+    if early_stopper_callback:
+        callbacks.append(EarlyStopping(patience=config['patience']))
+    if checkpointer_callback:
+        callbacks.append(
+            ModelCheckpoint(
+                filepath=os.path.join('data', 'checkpoints', log_label + '.hdf5'),
+                verbose=config['verbose'],
+                save_best_only=True
+            )
         )
 
-    # Get samples per epoch.
-    # Multiply by 0.7 to attempt to guess how much of data.data is the train set.
-    steps_per_epoch = (len(data.data) * 0.7) // batch_size
+    model.fit_generator(
+        generator=train_gen,
+        steps_per_epoch=config['steps_per_epoch'],
+        epochs=config['nb_epoch'],
+        verbose=config['verbose'],
+        callbacks=callbacks,
+        validation_data=val_generator,
+        validation_steps=40,
+        workers=4)
 
-    if load_to_memory:
-        # Get data.
-        X, y = data.get_all_sequences_in_memory('train', data_type)
-        X_test, y_test = data.get_all_sequences_in_memory('test', data_type)
-    else:
-        # Get generators.
-        generator = data.frame_generator(batch_size, 'train', data_type)
-        val_generator = data.frame_generator(batch_size, 'test', data_type)
+
+def main(model_name, dataset, model_path=None, run_label=None):
+    """Given a model and a training set, train."""
+    paths = config['models'][model_name]['paths']
+    input_shapes = [x['input_shape'] for x in paths]
+    preprocessing_steps = [x['preprocessing_steps'] for x in paths]
+    nb_classes = config['datasets'][dataset]['nb_classes']
 
     # Get the model.
-    rm = ResearchModels(len(data.classes), model, seq_length, saved_model)
+    if model_path:
+        model = load_model(model_path)
+    else: 
+        model = get_model(nb_classes, model_name, config['sequence_length'],
+                          config['optimizer'], config['learning_rate'], input_shapes)
 
-    # Fit!
-    if load_to_memory:
-        # Use standard fit.
-        rm.model.fit(
-            X,
-            y,
-            batch_size=batch_size,
-            validation_data=(X_test, y_test),
-            verbose=1,
-            callbacks=[tb, early_stopper, csv_logger],
-            epochs=nb_epoch)
-    else:
-        # Use fit generator.
-        rm.model.fit_generator(
-            generator=generator,
-            steps_per_epoch=steps_per_epoch,
-            epochs=nb_epoch,
-            verbose=1,
-            callbacks=[tb, early_stopper, csv_logger, checkpointer],
-            validation_data=val_generator,
-            validation_steps=40,
-            workers=4)
+    # Get the data generators.
+    generators = get_dataset(config['sequence_length'], nb_classes,
+                             input_shapes, preprocessing_steps,
+                             config['batch_size'])
+        
+    train(model, generators, run_label)
 
-def main():
-    """These are the main training settings. Set each before running
-    this file."""
-    # model can be one of lstm, lrcn, mlp, conv_3d, c3d
-    model = 'lstm'
-    saved_model = None  # None or weights file
-    class_limit = None  # int, can be 1-101 or None
-    seq_length = 40
-    load_to_memory = False  # pre-load the sequences into memory
-    batch_size = 32
-    nb_epoch = 1000
-
-    # Chose images or features and image shape based on network.
-    if model in ['conv_3d', 'c3d', 'lrcn']:
-        data_type = 'images'
-        image_shape = (80, 80, 3)
-    elif model in ['lstm', 'mlp']:
-        data_type = 'features'
-        image_shape = None
-    else:
-        raise ValueError("Invalid model. See train.py for options.")
-
-    train(data_type, seq_length, model, saved_model=saved_model,
-          class_limit=class_limit, image_shape=image_shape,
-          load_to_memory=load_to_memory, batch_size=batch_size, nb_epoch=nb_epoch)
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description='Train video classifiers.')
+    parser.add_argument('model_name', action='store',
+                        help='The model to be trained',
+                        choices=list(config['models'].keys()))
+    parser.add_argument('dataset', action='store',
+                        help='The dataset to train on',
+                        choices=list(config['datasets'].keys()))
+    parser.add_argument('--model_path', action='store', dest='model_path',
+                        help='Saved model to load.', default=None)
+    parser.add_argument('--run_label', action='store', dest='run_label',
+                        help='Label for TensorBoard log and model checkpoints.',
+                        default=None)
+    args = parser.parse_args()
+
+    main(args.model_name, args.dataset, args.model_path, args.run_label)
