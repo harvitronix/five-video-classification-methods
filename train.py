@@ -54,10 +54,11 @@ def main(model_name, dataset, model_path=None, run_label=None):
         model = load_model(model_path)
     else: 
         model = get_model(nb_classes, model_name, config['sequence_length'],
-                          config['optimizer'], config['learning_rate'], input_shapes)
+                          config['optimizer'], config['learning_rate'], input_shapes,
+                          config['verbose'])
 
     # Get the data generators.
-    generators = get_dataset(config['sequence_length'], nb_classes,
+    generators = get_dataset(dataset, config['sequence_length'], nb_classes,
                              input_shapes, preprocessing_steps,
                              config['batch_size'])
         

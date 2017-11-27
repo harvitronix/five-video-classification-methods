@@ -1,11 +1,12 @@
 """
 Base function for retrieving and compiling a model.
 """
+import models.c3d as c3d
 from keras.layers.recurrent import LSTM
 from keras.optimizers import Adam, RMSprop
 
 def get_model(nb_classes, model_name, seq_length, optimizer='adam',
-              learning_rate=1e-5, input_shape=(80, 80, 3),
+              learning_rate=1e-5, input_shapes=(80, 80, 3),
               verbose=True):
     """
     `model` = one of:
@@ -25,7 +26,7 @@ def get_model(nb_classes, model_name, seq_length, optimizer='adam',
         metrics.append('top_k_categorical_accuracy')
 
     if model_name == 'c3d':
-        model = c3d.model(nb_classes, input_shape)
+        model = c3d.model(nb_classes, input_shapes[0])
     else:
         raise ValueError("Unknown network name.")
 
