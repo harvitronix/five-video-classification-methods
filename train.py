@@ -5,7 +5,7 @@ from config import config
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping, CSVLogger
 from keras.models import load_model
 from models.base import get_model
-from datasets.base import get_dataset
+from datasets.base import get_generators
 import time
 import os.path
 import argparse
@@ -46,7 +46,7 @@ def main(model_name, dataset, model_path=None, run_label=None):
     """Given a model and a training set, train."""
     paths = config['models'][model_name]['paths']
     input_shapes = [x['input_shape'] for x in paths]
-    preprocessing_steps = [x['preprocessing_steps'] for x in paths]
+    preprocessing_steps = [x['preprocessing'] for x in paths]
     nb_classes = config['datasets'][dataset]['nb_classes']
 
     # Get the model.
@@ -58,9 +58,9 @@ def main(model_name, dataset, model_path=None, run_label=None):
                           config['verbose'])
 
     # Get the data generators.
-    generators = get_dataset(dataset, config['sequence_length'], nb_classes,
-                             input_shapes, preprocessing_steps,
-                             config['batch_size'])
+    generators = get_generators(dataset, config['sequence_length'], nb_classes,
+                                input_shapes, preprocessing_steps,
+                                config['batch_size'])
         
     train(model, generators, run_label)
 

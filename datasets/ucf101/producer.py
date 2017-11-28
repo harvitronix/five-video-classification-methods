@@ -1,6 +1,3 @@
-"""
-Class for managing our data.
-"""
 import csv
 import numpy as np
 import random
@@ -9,30 +6,11 @@ import os.path
 import sys
 import operator
 import threading
-from utils.processor import process_image
 from keras.utils import to_categorical
 from config import config
 
-class threadsafe_iterator:
-    def __init__(self, iterator):
-        self.iterator = iterator
-        self.lock = threading.Lock()
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        with self.lock:
-            return next(self.iterator)
-
-def threadsafe_generator(func):
-    """Decorator"""
-    def gen(*a, **kw):
-        return threadsafe_iterator(func(*a, **kw))
-    return gen
-
 class DataSet():
-    def __init__(self, seq_length, nb_classes, input_shape):
+    def __init__(self, seq_length, nb_classes):
         self.seq_length = seq_length
         self.class_limit = nb_classes
 
@@ -47,8 +25,6 @@ class DataSet():
 
         # Now do some minor data cleaning.
         self.data = self.clean_data()
-
-        self.image_shape = input_shape
 
     @staticmethod
     def get_data():
@@ -100,7 +76,6 @@ class DataSet():
         test = list(filter(lambda x: x[0] == 'test', self.data))
         return train, test
 
-    @threadsafe_generator
     def frame_generator(self, batch_size, train_test):
         """Return a generator that we can use to train on. There are
         a couple different things we can return:
@@ -114,7 +89,7 @@ class DataSet():
         print("Creating %s generator with %d samples." % (train_test, len(data)))
 
         while 1:
-            x = np.zeros((batch_size, self.seq_length, *self.image_shape))
+            x = []
             y = np.zeros((batch_size, len(self.classes)))
             samples = random.sample(data, batch_size)
 
@@ -124,17 +99,10 @@ class DataSet():
                 frames = self.get_frames_for_sample(sample)
                 sampled_frames = self.rescale_list(frames, self.seq_length)
 
-                # Build the image sequence
-                sequence = self.build_image_sequence(sampled_frames)
-
-                x[i] = np.array(sequence)
+                x.append(sampled_frames)
                 y[i] = self.get_class_one_hot(sample[1])
 
             yield x, y
-
-    def build_image_sequence(self, frames):
-        """Given a set of frames (filenames), build our sequence."""
-        return [process_image(x, self.image_shape) for x in frames]
 
     @staticmethod
     def get_frames_for_sample(sample):

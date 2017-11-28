@@ -9,7 +9,7 @@ config = {
     'steps_per_epoch': 100,
     'validation_steps': 20,
     'verbose': True,
-    'workers': 4,
+    'workers': 1,
 
     'tensorboard_callback': True,
     'early_stopper_callback': True,
@@ -19,7 +19,7 @@ config = {
         'c3d': {
             'paths': [
                 {
-                    'preprocessing_steps': [],
+                    'preprocessing': 'images',
                     'input_shape': (80, 80, 3),
                 },
             ],
@@ -27,7 +27,7 @@ config = {
         'vgg_rnn': {
             'paths': [
                 {
-                    'preprocessing_steps': [],
+                    'preprocessing': 'images',
                     'input_shape': (80, 80, 3),
                 },
             ],
@@ -35,7 +35,7 @@ config = {
         'conv3d': {
             'paths': [
                 {
-                    'preprocessing_steps': [],
+                    'preprocessing': 'images',
                     'input_shape': (80, 80, 3),
                 },
             ],
@@ -43,7 +43,7 @@ config = {
         'lrcn': {
             'paths': [
                 {
-                    'preprocessing_steps': [],
+                    'preprocessing': 'images',
                     'input_shape': (80, 80, 3),
                 },
             ],

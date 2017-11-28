@@ -1,11 +1,8 @@
-"""
-Process an image that we can pass to our networks.
-"""
 from keras.preprocessing.image import img_to_array, load_img
 import numpy as np
 
 def process_image(image, target_shape):
-    """Given an image, process it and return the array."""
+    """Given an image, open it and return the array (between 0-1)."""
     # Load the image.
     h, w, _ = target_shape
     image = load_img(image, target_size=(h, w))
