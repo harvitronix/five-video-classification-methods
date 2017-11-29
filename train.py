@@ -1,7 +1,16 @@
 """
-Train our RNN on extracted features or images.
+Model training starts here. Configure the run in config.py, then run this
+file to train your model on your dataset.
 """
 from config import config
+
+# Hack to use CPU (used if model can't fit into GPU memory)
+# See https://github.com/fchollet/keras/issues/4613
+if config['CPU_only']:
+    import os
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
+    os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping, CSVLogger
 from keras.models import load_model
 from models.base import get_model

@@ -14,9 +14,6 @@ class DataSet():
         self.seq_length = seq_length
         self.class_limit = nb_classes
 
-        # TODO This shouldn't be hard coded
-        self.max_frames = 300  # max number of frames a video can have for us to use it
-
         # Get the data.
         self.data = self.get_data()
 
@@ -37,8 +34,7 @@ class DataSet():
         return data
 
     def sample_filter(self, x):
-        return int(x[3]) >= self.seq_length and int(x[3]) <= self.max_frames \
-            and x[1] in self.classes
+        return int(x[3]) >= self.seq_length and x[1] in self.classes
 
     def clean_data(self):
         """Limit samples to greater than the sequence length and fewer
@@ -97,7 +93,10 @@ class DataSet():
             for i, sample in enumerate(samples):
                 # Get and resample frames.
                 frames = self.get_frames_for_sample(sample)
-                sampled_frames = self.rescale_list(frames, self.seq_length)
+
+                # Get a random start point for this sample and grab seq_length frames
+                start = random.randint(0, len(frames) - self.seq_length)
+                sampled_frames = frames[start:start + self.seq_length]
 
                 x.append(sampled_frames)
                 y[i] = self.get_class_one_hot(sample[1])
@@ -112,22 +111,6 @@ class DataSet():
         path = os.path.join('datasets', 'ucf101', sample[0], sample[1], sample[2] + '*jpg')
         images = sorted(glob.glob(path))
         return images
-
-    @staticmethod
-    def rescale_list(input_list, size):
-        """Given a list and a size, return a rescaled/samples list. For example,
-        if we want a list of size 5 and we have a list of size 25, return a new
-        list of size five which is every 5th element of the origina list."""
-        assert len(input_list) >= size
-
-        # Get the number to skip between iterations.
-        skip = len(input_list) // size
-
-        # Build our new output.
-        output = [input_list[i] for i in range(0, len(input_list), skip)]
-
-        # Cut off the last one if needed.
-        return output[:size]
 
     @staticmethod
     def print_class_from_prediction(predictions, nb_to_return=5):
