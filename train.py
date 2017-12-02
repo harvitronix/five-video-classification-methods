@@ -8,13 +8,15 @@ from config import config
 # See https://github.com/fchollet/keras/issues/4613
 if config['CPU_only']:
     import os
-    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping, CSVLogger
 from keras.models import load_model
 from models.base import get_model
+from models.config import config as models_config
 from datasets.base import get_generators
+from datasets.config import config as datasets_config
 import time
 import os.path
 import argparse
@@ -50,13 +52,18 @@ def train(model, generators, run_label):
         validation_steps=config['validation_steps'],
         workers=config['workers'])
 
+    return model
 
-def main(model_name, dataset, model_path=None, run_label=None):
+
+def main(model_name, dataset, model_path=None):
     """Given a model and a training set, train."""
-    paths = config['models'][model_name]['paths']
+    paths = models_config['models'][model_name]['paths']
     input_shapes = [x['input_shape'] for x in paths]
     preprocessing_steps = [x['preprocessing'] for x in paths]
-    nb_classes = config['datasets'][dataset]['nb_classes']
+    if config['class_limit']:
+        nb_classes = config['class_limit']
+    else:
+        nb_classes = datasets_config['datasets'][dataset]['nb_classes']
 
     # Get the model.
     if model_path:
@@ -70,23 +77,19 @@ def main(model_name, dataset, model_path=None, run_label=None):
     generators = get_generators(dataset, config['sequence_length'], nb_classes,
                                 input_shapes, preprocessing_steps,
                                 config['batch_size'])
+    
+    train(model, generators, config['run_label'])
         
-    train(model, generators, run_label)
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train video classifiers.')
     parser.add_argument('model_name', action='store',
                         help='The model to be trained',
-                        choices=list(config['models'].keys()))
+                        choices=list(models_config['models'].keys()))
     parser.add_argument('dataset', action='store',
                         help='The dataset to train on',
-                        choices=list(config['datasets'].keys()))
+                        choices=list(datasets_config['datasets'].keys()))
     parser.add_argument('--model_path', action='store', dest='model_path',
                         help='Saved model to load.', default=None)
-    parser.add_argument('--run_label', action='store', dest='run_label',
-                        help='Label for TensorBoard log and model checkpoints.',
-                        default=None)
     args = parser.parse_args()
 
-    main(args.model_name, args.dataset, args.model_path, args.run_label)
+    main(args.model_name, args.dataset, args.model_path)
