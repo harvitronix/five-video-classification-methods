@@ -23,7 +23,7 @@ import seaborn as sns
 import argparse
 
 # Replace with dynamic class names.
-CLASSES = ['ApplyEyeMakeup', 'ApplyLipstick', 'Archery', 'BabyCrawling', 'BalanceBeam', 'BandMarching', 'BaseballPitch', 'Basketball', 'BasketballDunk', 'BenchPress']
+CLASSES = ['ApplyEyeMakeup', 'ApplyLipstick', 'Archery', 'BabyCrawling', 'BalanceBeam', 'BandMarching', 'BaseballPitch', 'Basketball', 'BasketballDunk', 'BenchPress', 'Biking', 'Billiards', 'BlowDryHair', 'BlowingCandles', 'BodyWeightSquats', 'Bowling', 'BoxingPunchingBag', 'BoxingSpeedBag', 'BreastStroke', 'BrushingTeeth']
 
 def evaluate(model, val_gen):
     # Get a subset of the test data. We do this so we can compare the predictions
@@ -40,19 +40,11 @@ def evaluate(model, val_gen):
             y.append(sample)
     eval_x = np.array(x)
     eval_y = np.array(y)
-    #print(len(eval_data))
-    #merged_eval_data = list(chain(*eval_data))
-    #print(len(merged_eval_data))
-    #eval_x = merged_eval_data[0]
-    #eval_y = merged_eval_data[1]
-
-    print('shape', eval_x.shape, eval_y.shape)
-
+    
     # Now predict with the trained model and compare to the actual.
     predictions = model.predict(eval_x, verbose=1, batch_size=8)
     predictions_index = predictions.argmax(axis=-1)
     actual_index = eval_y.argmax(axis=-1)
-    print(actual_index, predictions_index)
     confusion_matrix = metrics.confusion_matrix(actual_index, predictions_index,
                                                 labels=list(range(10)))
     print(confusion_matrix)

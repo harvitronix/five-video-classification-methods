@@ -55,8 +55,11 @@ def train(model, generators, run_label):
     return model
 
 
-def main(model_name, dataset, model_path=None):
-    """Given a model and a training set, train."""
+def main():
+    """Based on the configuration files, load a model and a dataset and train."""
+    model_name = config['model']
+    dataset_name = config['dataset']
+    model_path = config['model_path']
     paths = models_config['models'][model_name]['paths']
     input_shapes = [x['input_shape'] for x in paths]
     preprocessing_steps = [x['preprocessing'] for x in paths]
@@ -74,22 +77,11 @@ def main(model_name, dataset, model_path=None):
                           config['verbose'])
 
     # Get the data generators.
-    generators = get_generators(dataset, config['sequence_length'], nb_classes,
+    generators = get_generators(dataset_name, config['sequence_length'], nb_classes,
                                 input_shapes, preprocessing_steps,
                                 config['batch_size'])
     
     train(model, generators, config['run_label'])
         
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Train video classifiers.')
-    parser.add_argument('model_name', action='store',
-                        help='The model to be trained',
-                        choices=list(models_config['models'].keys()))
-    parser.add_argument('dataset', action='store',
-                        help='The dataset to train on',
-                        choices=list(datasets_config['datasets'].keys()))
-    parser.add_argument('--model_path', action='store', dest='model_path',
-                        help='Saved model to load.', default=None)
-    args = parser.parse_args()
-
-    main(args.model_name, args.dataset, args.model_path)
+    main()

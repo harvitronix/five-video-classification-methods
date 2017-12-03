@@ -16,7 +16,7 @@ def model(nb_classes, input_shape):
     cnn = VGG16(weights='imagenet', include_top=False, pooling='avg')
 
     # Don't retrain the VGG
-    cnn.trainable = False
+    cnn.trainable = True
 
     net_input = Input(shape=input_shape, name='net_input')
 
@@ -24,7 +24,7 @@ def model(nb_classes, input_shape):
     x = TimeDistributed(cnn)(net_input)
 
     # Add the LSTM.
-    x = LSTM(512, dropout=0.5)(x)
+    x = LSTM(64, dropout=0.5)(x)
 
     predictions = Dense(nb_classes, activation='softmax')(x)
 
