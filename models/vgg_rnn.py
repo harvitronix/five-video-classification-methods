@@ -14,8 +14,6 @@ def model(nb_classes, input_shape):
     """
     # Get a pre-trained CNN.
     cnn = VGG16(weights='imagenet', include_top=False, pooling='avg')
-
-    # Don't retrain the VGG
     cnn.trainable = True
 
     net_input = Input(shape=input_shape, name='net_input')
