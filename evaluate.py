@@ -46,7 +46,7 @@ def evaluate(model, val_gen):
     predictions_index = predictions.argmax(axis=-1)
     actual_index = eval_y.argmax(axis=-1)
     confusion_matrix = metrics.confusion_matrix(actual_index, predictions_index,
-                                                labels=list(range(10)))
+                                                labels=list(range(len(CLASSES))))
     print(confusion_matrix)
 
     # Visualize the confusion matrix.
