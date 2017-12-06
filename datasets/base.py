@@ -1,4 +1,5 @@
 from datasets.ucf101 import producer
+from datasets.synthetic_boxes import producer
 from processors.process_image import process_image
 import threading
 import numpy as np
@@ -46,7 +47,7 @@ def generate_batch(preprocessing_steps, input_shapes, producer_gen):
         yield x_paths, y
 
 def get_generators(dataset, sequence_length, nb_classes, input_shapes,
-                   preprocessing_steps, batch_size):
+                   preprocessing_steps, batch_size, params=None):
     """
     Retrieves the appropriate dataset, runs it through appropriate processors,
     and provides a list of generators of its own.
@@ -60,8 +61,13 @@ def get_generators(dataset, sequence_length, nb_classes, input_shapes,
         data = producer.DataSet(sequence_length, nb_classes)
         train_gen = data.frame_generator(batch_size, 'train')
         test_gen = data.frame_generator(batch_size, 'test')
+    elif dataset == 'synthetic_boxes':
+        dataset = producer.SyntheticBoxes(batch_size, input_shapes[0], input_shapes[1],
+            sequence_length, **params)
+        # Train and test are the same since it's all synthetically-generated data.
+        train_gen = test_gen = dataset
     else:
-        raise ValueError("Invalid dataset.")
+        raise NotImplemented("Invalid dataset.")
 
     processed_train_gen = generate_batch(preprocessing_steps, input_shapes, train_gen)
     processed_test_gen = generate_batch(preprocessing_steps, input_shapes, test_gen)
