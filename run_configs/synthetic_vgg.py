@@ -1,13 +1,13 @@
 config = {
     'batch_size': 4,
-    'class_limit': 20,
+    'class_limit': None,
     'CPU_only': False,
     'early_stopping': True,
-    'learning_rate': 5e-5,
+    'learning_rate': 1e-3,
     'nb_epoch': 1000,
     'optimizer': 'sgd',
-    'patience': 30,
-    'sequence_length': 30,
+    'patience': 10,
+    'sequence_length': 10,
     'steps_per_epoch': 100,
     'validation_steps': 40,
     'verbose': True,
@@ -15,10 +15,10 @@ config = {
 
     'tensorboard_callback': True,
     'early_stopper_callback': True,
-    'checkpointer_callback': True,
+    'checkpointer_callback': False,
 
-    'run_label': 'vgg_rnn-30frames-sgd5e5-20-classes',
+    'run_label': 'synth_vgg_rnn-1e-3',
     'model': 'vgg_rnn',
-    'dataset': 'ucf101',
-    'model_path': 'data/checkpoints/vgg_rnn-30frames-sgd-20-classes.hdf5',
+    'dataset': 'synthetic_boxes',
+    'model_path': None,
 }

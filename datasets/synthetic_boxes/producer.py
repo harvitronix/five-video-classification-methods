@@ -106,10 +106,10 @@ class SyntheticBoxes():
     """Class that defines a spatiotemporal dataset generator."""
 
     def __init__(self, batch_size, surface_width, surface_height,
+                 nb_frames,
                  background_shapes=False,
                  jitter_move=False,
                  linear_move=False,
-                 nb_frames=16,
                  random_angle=False,
                  random_angle_per_frame=False,
                  random_background_color=False,
@@ -226,8 +226,8 @@ class SyntheticBoxes():
 
     def get_sequence(self, delta):
         """Generate a sequence in a batch."""
-        # TODO Use a numpy array from the beginning
-        sequence_X = []
+        sequence_X = np.zeros((self.nb_frames, self.surface_height,
+            self.surface_width, 3))
 
         # Set the change amount.
         self.px_per_frame = delta
@@ -266,13 +266,8 @@ class SyntheticBoxes():
             surface_arr.shape = (self.surface_height, self.surface_width, 4)
             surface_arr = surface_arr[:,:,:3]  # remove alpha channel
 
-            # Process the image for the NN.
-            # TODO: 0-base it by subtracting 0.5?
-            # TODO: Remove pre-processing
-            surface_arr = (surface_arr / 255.).astype(np.float32)
-
             # Add it to the array.
-            sequence_X.append(surface_arr)
+            sequence_X[i] = surface_arr
 
             # Change color for the next frame.
             if self.random_background_color and self.random_bg_per_frame:
@@ -318,29 +313,28 @@ class SyntheticBoxes():
     def data_gen(self):
         """A generator that returns sequences of frames."""
         while True:
-            # TODO: These should be initialized as numpy arrays.
-            batch_X = []
-            batch_y = []
+            batch_X = np.zeros((self.batch_size, self.nb_frames, self.surface_height,
+            self.surface_width, 3))
+            batch_y = np.zeros((self.batch_size, 5))
 
-            for _ in range(self.batch_size):
+            for i in range(self.batch_size):
                 # Sample from a normal distribution.
                 delta = np.random.normal(0, .01)
 
                 # Get the label vector corresponding to the delta.
                 bin_class = self.delta_to_label(delta)
-                label = utils.to_categorical(bin_class, 5)[0]
+                label = utils.to_categorical(bin_class, 5)
 
-                sequence_X = self.get_sequence(delta)
+                batch_X[i] = self.get_sequence(delta)
+                batch_y[i] = label
 
-                batch_X.append(sequence_X)
-                batch_y.append(label)
-
-            yield np.array(batch_X), np.array(batch_y)
+            yield batch_X, batch_y
 
 if __name__ == '__main__':
     #Just for testing.
     from PIL import Image
-    toy = SyntheticBoxes(1, 112, 112,
+    toy = SyntheticBoxes(1, 80, 80, nb_frames=10)
+    """
         background_shapes=False,
         jitter_move=False,
         linear_move=False,
@@ -352,24 +346,20 @@ if __name__ == '__main__':
         random_move=False,
         random_angle=False,
         random_angle_per_frame=False)
-
+    """
     start = time.time()
     i = 0
-    for x, y in toy.gen_data():
+    for x, y in toy.data_gen():
         print(x.shape, y.shape)
 
         # Checkout the first batch.
         for sequence in x:
             for i, image in enumerate(sequence):
-                image *= 255
+                #image *= 255
                 image = Image.fromarray(image.astype('uint8'))
                 image.save('tmp/' + str(i) + '.png')
             print(y[0])
             sys.exit()
 
-        i += 1
+        break
 
-        if i != 0 and i % 100 == 0:
-            print(100 / ((time.time() - start) / 60))
-            start = time.time()
-            sys.exit()

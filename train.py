@@ -46,7 +46,7 @@ def main(config):
     if config['class_limit']:
         nb_classes = config['class_limit']
     else:
-        nb_classes = datasets_config['datasets'][dataset]['nb_classes']
+        nb_classes = datasets_config['datasets'][config['dataset']]['nb_classes']
 
     # Get the model.
     if model_path:

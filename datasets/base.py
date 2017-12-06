@@ -56,17 +56,19 @@ def get_generators(dataset, sequence_length, nb_classes, input_shapes,
     processed images. That way we can process as needed here.
 
     TODO: Explain this further, once I decide how best to do it.
+    TODO: Let us pass arbitrary parameters through here into the producers
     """
     if dataset == 'ucf101':
         data = ucf_producer.DataSet(sequence_length, nb_classes)
         train_gen = data.frame_generator(batch_size, 'train')
         test_gen = data.frame_generator(batch_size, 'test')
     elif dataset == 'synthetic_boxes':
+        # TODO Assumes the first (or only) path is an image shape
         dataset = synthetic_producer.SyntheticBoxes(
-            batch_size, input_shapes[0], input_shapes[1],
-            sequence_length, **params)
+            batch_size, input_shapes[0][0], input_shapes[0][1],
+            nb_frames=sequence_length)
         # Train and test are the same since it's all synthetically-generated data.
-        train_gen = test_gen = dataset
+        train_gen = test_gen = dataset.data_gen()
     else:
         raise NotImplemented("Invalid dataset.")
 
