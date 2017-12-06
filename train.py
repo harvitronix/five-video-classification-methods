@@ -2,26 +2,6 @@
 Model training starts here. Configure the run in config.py, then run this
 file to train your model on your dataset.
 """
-from config import config
-
-# Hack to use CPU (used if model can't fit into GPU memory)
-# See https://github.com/fchollet/keras/issues/4613
-if config['CPU_only']:
-    import os
-    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICES"] = ""
-
-from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping, CSVLogger
-from keras.models import load_model
-from models.base import get_model
-from models.config import config as models_config
-from datasets.base import get_generators
-from datasets.config import config as datasets_config
-import time
-import os.path
-import argparse
-
-
 def train(model, generators, run_label):
     train_gen, val_gen = generators
 
@@ -55,7 +35,7 @@ def train(model, generators, run_label):
     return model
 
 
-def main():
+def main(config):
     """Based on the configuration files, load a model and a dataset and train."""
     model_name = config['model']
     dataset_name = config['dataset']
@@ -84,4 +64,32 @@ def main():
     train(model, generators, config['run_label'])
         
 if __name__ == '__main__':
-    main()
+    import argparse
+    import importlib
+    import os.path
+    parser = argparse.ArgumentParser(description='Train a classifier.')
+    parser.add_argument('config', action='store',
+                        help='The filename of the run config.')
+    args = parser.parse_args()
+    
+    # Get the config...
+    imp = importlib.import_module('run_configs.' + args.config)
+    config = imp.config
+    
+    # Hack to use CPU (used if model can't fit into GPU memory)
+    # See https://github.com/fchollet/keras/issues/4613
+    if config['CPU_only']:
+        import os
+        os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+        os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
+    # As crazy as it is, we import stuff here to deal with config options.
+    from datasets.base import get_generators
+    from datasets.config import config as datasets_config
+    from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping, CSVLogger
+    from keras.models import load_model
+    from models.base import get_model
+    from models.config import config as models_config
+    import time
+
+    main(config)

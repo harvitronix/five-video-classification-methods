@@ -7,7 +7,7 @@ import sys
 import operator
 import threading
 from keras.utils import to_categorical
-from config import config
+from datasets.config import config
 
 class DataSet():
     def __init__(self, seq_length, nb_classes):

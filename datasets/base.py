@@ -1,5 +1,5 @@
-from datasets.ucf101 import producer
-from datasets.synthetic_boxes import producer
+from datasets.ucf101 import producer as ucf_producer
+from datasets.synthetic_boxes import producer as synthetic_producer
 from processors.process_image import process_image
 import threading
 import numpy as np
@@ -58,11 +58,12 @@ def get_generators(dataset, sequence_length, nb_classes, input_shapes,
     TODO: Explain this further, once I decide how best to do it.
     """
     if dataset == 'ucf101':
-        data = producer.DataSet(sequence_length, nb_classes)
+        data = ucf_producer.DataSet(sequence_length, nb_classes)
         train_gen = data.frame_generator(batch_size, 'train')
         test_gen = data.frame_generator(batch_size, 'test')
     elif dataset == 'synthetic_boxes':
-        dataset = producer.SyntheticBoxes(batch_size, input_shapes[0], input_shapes[1],
+        dataset = synthetic_producer.SyntheticBoxes(
+            batch_size, input_shapes[0], input_shapes[1],
             sequence_length, **params)
         # Train and test are the same since it's all synthetically-generated data.
         train_gen = test_gen = dataset
