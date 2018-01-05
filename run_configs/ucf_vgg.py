@@ -2,7 +2,6 @@ config = {
     'batch_size': 4,
     'class_limit': 20,
     'CPU_only': False,
-    'early_stopping': True,
     'learning_rate': 5e-5,
     'nb_epoch': 1000,
     'optimizer': 'sgd',

@@ -1,5 +1,5 @@
 """
-Generate synthetic "video" date, which is really a bunch of colors boxes
+Generate synthetic "video" data, which is really a bunch of colors boxes
 jumping around. The label for this dataset consists of five classes:
 
 0 - box got much smaller
