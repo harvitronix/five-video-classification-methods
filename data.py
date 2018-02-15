@@ -206,6 +206,33 @@ class DataSet():
         else:
             return None
 
+    def get_frames_by_filename(self, filename, data_type):
+        """Given a filename for one of our samples, return the data
+        the model needs to make predictions."""
+        # First, find the sample row.
+        sample = None
+        for row in self.data:
+            if row[2] == filename:
+                sample = row
+                break
+        if sample is None:
+            raise ValueError("Couldn't find sample: %s" % filename)
+
+        if data_type == "images":
+            # Get and resample frames.
+            frames = self.get_frames_for_sample(sample)
+            frames = self.rescale_list(frames, self.seq_length)
+            # Build the image sequence
+            sequence = self.build_image_sequence(frames)
+        else:
+            # Get the sequence from disk.
+            sequence = self.get_extracted_sequence(data_type, sample)
+
+            if sequence is None:
+                raise ValueError("Can't find sequence. Did you generate them?")
+
+        return sequence
+
     @staticmethod
     def get_frames_for_sample(sample):
         """Given a sample row from the data file, get all the corresponding frame
@@ -236,12 +263,11 @@ class DataSet():
         # Cut off the last one if needed.
         return output[:size]
 
-    @staticmethod
-    def print_class_from_prediction(predictions, nb_to_return=5):
+    def print_class_from_prediction(self, predictions, nb_to_return=5):
         """Given a prediction, print the top classes."""
         # Get the prediction for each label.
         label_predictions = {}
-        for i, label in enumerate(data.classes):
+        for i, label in enumerate(self.classes):
             label_predictions[label] = predictions[i]
 
         # Now sort them.
