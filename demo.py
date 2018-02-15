@@ -8,12 +8,8 @@ features must be extracted first.
 Note also that this is a rushed demo script to help a few people who have
 requested it and so is quite "rough". :)
 """
-from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping, CSVLogger
 from keras.models import load_model
-from models import ResearchModels
 from data import DataSet
-import time
-import os.path
 import numpy as np
 
 def predict(data_type, seq_length, saved_model, image_shape, video_name, class_limit):
@@ -32,7 +28,7 @@ def predict(data_type, seq_length, saved_model, image_shape, video_name, class_l
     # Predict!
     prediction = model.predict(np.expand_dims(sample, axis=0))
     print(prediction)
-    print(data.print_class_from_prediction(np.squeeze(prediction, axis=0)))
+    data.print_class_from_prediction(np.squeeze(prediction, axis=0))
 
 def main():
     # model can be one of lstm, lrcn, mlp, conv_3d, c3d.
