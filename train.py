@@ -86,9 +86,12 @@ def main():
     this file."""
     # model can be one of lstm, lrcn, mlp, conv_3d, c3d
     model = 'lstm'
-    saved_model = path.join('data',
+    try:
+        saved_model = path.join('data',
                             'checkpoints',
-                            listdir(path.join('data', 'checkpoints'))[0])
+                            listdir(path.join('data', 'checkpoints'))[-1])
+    except:
+        saved_model=None
     class_limit = None  # int, can be 1-101 or None
     seq_length = 40
     load_to_memory = False  # pre-load the sequences into memory
