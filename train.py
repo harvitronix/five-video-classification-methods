@@ -2,30 +2,32 @@
 Train our RNN on extracted features or images.
 """
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping, CSVLogger
+from keras.models import load_model
 from models import ResearchModels
 from data import DataSet
 import time
-import os.path
+from os import path, listdir
 
 def train(data_type, seq_length, model, saved_model=None,
           class_limit=None, image_shape=None,
           load_to_memory=False, batch_size=32, nb_epoch=100):
     # Helper: Save the model.
     checkpointer = ModelCheckpoint(
-        filepath=os.path.join('data', 'checkpoints', model + '-' + data_type + \
-            '.{epoch:03d}-{val_loss:.3f}.hdf5'),
+        filepath=path.join('data', 
+                           'checkpoints',
+                           model + '-' + data_type + '.{epoch:03d}-{val_loss:.3f}.hdf5'),
         verbose=1,
         save_best_only=True)
 
     # Helper: TensorBoard
-    tb = TensorBoard(log_dir=os.path.join('data', 'logs', model))
+    tb = TensorBoard(log_dir=path.join('data', 'logs', model))
 
     # Helper: Stop when we stop learning.
     early_stopper = EarlyStopping(patience=5)
 
     # Helper: Save results.
     timestamp = time.time()
-    csv_logger = CSVLogger(os.path.join('data', 'logs', model + '-' + 'training-' + \
+    csv_logger = CSVLogger(path.join('data', 'logs', model + '-' + 'training-' + \
         str(timestamp) + '.log'))
 
     # Get the data and process it.
@@ -69,7 +71,6 @@ def train(data_type, seq_length, model, saved_model=None,
             callbacks=[tb, early_stopper, csv_logger],
             epochs=nb_epoch)
     else:
-        # Use fit generator.
         rm.model.fit_generator(
             generator=generator,
             steps_per_epoch=steps_per_epoch,
@@ -85,7 +86,9 @@ def main():
     this file."""
     # model can be one of lstm, lrcn, mlp, conv_3d, c3d
     model = 'lstm'
-    saved_model = None  # None or weights file
+    saved_model = path.join('data',
+                            'checkpoints',
+                            listdir(path.join('data', 'checkpoints'))[0])
     class_limit = None  # int, can be 1-101 or None
     seq_length = 40
     load_to_memory = False  # pre-load the sequences into memory
