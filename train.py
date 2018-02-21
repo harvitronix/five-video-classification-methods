@@ -83,12 +83,6 @@ def train(data_type, seq_length, model, saved_model=None,
             workers=4)
 
 
-    def atoi(text):
-        return int(text) if text.isdigit() else text
-
-    def natural_keys(text):
-        print(text)
-        return [ atoi(c) for c in re.split('(\d+)', text) ]
 def main():
     """These are the main training settings. Set each before running
     this file."""
@@ -99,9 +93,9 @@ def main():
         filesfolder=[path.join(pathfolder, fn) for fn in listdir(pathfolder)]
         saved_model=sorted(filesfolder,
                            key= lambda x:float(x.split('-')[2][:-5]))[0]
+        print("lowest loss model found: %s".format(saved_model))
     except:
         saved_model=None
-    print(saved_model)
     class_limit = None  # int, can be 1-101 or None
     seq_length = 40
     load_to_memory = False  # pre-load the sequences into memory
