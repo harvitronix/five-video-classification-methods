@@ -87,11 +87,12 @@ def main():
     # model can be one of lstm, lrcn, mlp, conv_3d, c3d
     model = 'lstm'
     try:
-        saved_model = path.join('data',
-                            'checkpoints',
-                            listdir(path.join('data', 'checkpoints'))[-1])
+        pathfolder=path.join('data','checkpoints')
+        filesfolder=[path.join(pathfolder, fn) for fn in listdir(pathfolder)]
+        saved_model = sorted(filesfolder,key=path.getmtime)[-1]
     except:
         saved_model=None
+    print(saved_model)
     class_limit = None  # int, can be 1-101 or None
     seq_length = 40
     load_to_memory = False  # pre-load the sequences into memory
