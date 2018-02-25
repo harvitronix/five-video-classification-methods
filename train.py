@@ -15,15 +15,18 @@ class EarlyStoppingByLossVal(Callback):
         self.monitor = monitor
         self.value = value
         self.verbose = verbose
-
+        self.current=0
+    def on_epoch_start(self, epoch, logs={}):
+        self.current = logs.get(self.monitor)
     def on_epoch_end(self, epoch, logs={}):
         current = logs.get(self.monitor)
+        print("old vall_loss {}, new vall_loss{},delta={}".format(self.current,current,self.current-current))
         if current is None:
             warnings.warn("Early stopping requires {} available!".format(self.monitor), RuntimeWarning)
 
-        if current > self.value:
+        if self.current-current> self.value:
             if self.verbose > 0:
-                print("Epoch {}: early stopping Train".format(epoch))
+                print("crash delta on Epoch {}: early stopping Train".format(epoch))
                 print("restarting the train")
             self.model.stop_training = True
             main()
@@ -45,7 +48,7 @@ def train(data_type, seq_length, model, saved_model=None,
 
     # Helper: Stop when we stop learning.
     early_stopper = EarlyStopping(patience=10)
-    superstop= EarlyStoppingByLossVal(value=3.8, verbose=1)
+    superstop= EarlyStoppingByLossVal(value=0.500, verbose=1)
 
     # Helper: Save results.
     timestamp = time.time()
