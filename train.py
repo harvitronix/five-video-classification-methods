@@ -1,13 +1,33 @@
 """
 Train our RNN on extracted features or images.
 """
-from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping, CSVLogger
+from keras.callbacks import TensorBoard, ModelCheckpoint,EarlyStopping,CSVLogger,Callback
 from keras.models import load_model
 from models import ResearchModels
 from data import DataSet
 import time
 import re
 from os import path, listdir
+
+class EarlyStoppingByLossVal(Callback):
+    def __init__(self, monitor='val_loss', value=0.00001, verbose=0):
+        super(Callback, self).__init__()
+        self.monitor = monitor
+        self.value = value
+        self.verbose = verbose
+
+    def on_epoch_end(self, epoch, logs={}):
+        current = logs.get(self.monitor)
+        if current is None:
+            warnings.warn("Early stopping requires {} available!".format(self.monitor), RuntimeWarning)
+
+        if current > self.value:
+            if self.verbose > 0:
+                print("Epoch {}: early stopping Train".format(epoch))
+                print("restarting the train")
+            self.model.stop_training = True
+            main()
+
 
 def train(data_type, seq_length, model, saved_model=None,
           class_limit=None, image_shape=None,
@@ -17,14 +37,15 @@ def train(data_type, seq_length, model, saved_model=None,
         filepath=path.join('data', 
                            'checkpoints',
                            model + '-' + data_type + '.{epoch:03d}-{val_loss:.3f}.hdf5'),
-        verbose=1,
+        verbose=2,
         save_best_only=True)
 
     # Helper: TensorBoard
     tb = TensorBoard(log_dir=path.join('data', 'logs', model))
 
     # Helper: Stop when we stop learning.
-    early_stopper = EarlyStopping(patience=5)
+    early_stopper = EarlyStopping(patience=10)
+    superstop= EarlyStoppingByLossVal(value=3.8, verbose=1)
 
     # Helper: Save results.
     timestamp = time.time()
@@ -77,7 +98,11 @@ def train(data_type, seq_length, model, saved_model=None,
             steps_per_epoch=steps_per_epoch,
             epochs=nb_epoch,
             verbose=1,
-            callbacks=[tb, early_stopper, csv_logger, checkpointer],
+            callbacks=[tb,
+                       early_stopper,
+                       csv_logger,
+                       checkpointer,
+                      superstop],
             validation_data=val_generator,
             validation_steps=40,
             workers=4)
@@ -93,7 +118,7 @@ def main():
         filesfolder=[path.join(pathfolder, fn) for fn in listdir(pathfolder)]
         saved_model=sorted(filesfolder,
                            key= lambda x:float(x.split('-')[2][:-5]))[0]
-        print("lowest loss model found: %s".format(saved_model))
+        print("lowest loss model found: {}".format(saved_model))
     except:
         saved_model=None
     class_limit = None  # int, can be 1-101 or None

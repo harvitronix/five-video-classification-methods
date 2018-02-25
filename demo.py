@@ -11,9 +11,11 @@ requested it and so is quite "rough". :)
 from keras.models import load_model
 from data import DataSet
 import numpy as np
+from os import  path,listdir
 
-def predict(data_type, seq_length, saved_model, image_shape, video_name, class_limit):
-    model = load_model(saved_model)
+
+
+def predict(model,data_type, seq_length, image_shape, video_name, class_limit):
 
     # Get the data and process it.
     if image_shape is None:
@@ -32,13 +34,23 @@ def predict(data_type, seq_length, saved_model, image_shape, video_name, class_l
 
 def main():
     # model can be one of lstm, lrcn, mlp, conv_3d, c3d.
-    model = 'lstm'
+    typemodel = 'lstm'
     # Must be a weights file.
-    saved_model = 'data/checkpoints/lstm-features.026-0.239.hdf5'
+    try:
+        pathfolder=path.join('data','checkpoints')
+        filesfolder=[path.join(pathfolder, fn) for fn in listdir(pathfolder)]
+        saved_model=sorted(filesfolder,
+                           key= lambda x:float(x.split('-')[2][:-5]))[0]
+        print("lowest loss model found: {}".format(saved_model))
+    except:
+        saved_model=None
+    print("loading model")
+    model = load_model(saved_model)
+    print("model loaded")
     # Sequence length must match the lengh used during training.
     seq_length = 40
     # Limit must match that used during training.
-    class_limit = 4
+    class_limit = None
 
     # Demo file. Must already be extracted & features generated (if model requires)
     # Do not include the extension.
@@ -47,19 +59,24 @@ def main():
     # TODO Make this way more useful. It should take in the path to
     # an actual video file, extract frames, generate sequences, etc.
     #video_name = 'v_Archery_g04_c02'
-    video_name = 'v_ApplyLipstick_g01_c01'
-
-    # Chose images or features and image shape based on network.
-    if model in ['conv_3d', 'c3d', 'lrcn']:
+    #mod for get a array of videos to test
+    video_name = ['v_Archery_g04_c02','v_Archery_g04_c03'] 
+        # Chose images or features and image shape based on network.
+    if typemodel in ['conv_3d', 'c3d', 'lrcn']:
         data_type = 'images'
         image_shape = (80, 80, 3)
-    elif model in ['lstm', 'mlp']:
+    elif typemodel in ['lstm', 'mlp']:
         data_type = 'features'
         image_shape = None
     else:
         raise ValueError("Invalid model. See train.py for options.")
 
-    predict(data_type, seq_length, saved_model, image_shape, video_name, class_limit)
-
+    #for video_name in video_name:
+    for a in video_name:
+        try:
+            video_name=a
+            predict(model,data_type, seq_length, image_shape, video_name, class_limit)
+        except:
+            pass
 if __name__ == '__main__':
     main()
