@@ -37,8 +37,8 @@ def validate(data_type, model, seq_length=40, saved_model=None,
     print(rm.model.metrics_names)
 
 def main():
-    model = 'mlp'
-    saved_model = 'data/ucf101/checkpoints/mlp-features.023-0.926.hdf5'
+    model = 'lstm'
+    saved_model = 'data/checkpoints/lstm-features.026-0.239.hdf5'
 
     if model == 'conv_3d' or model == 'lrcn':
         data_type = 'images'
@@ -48,7 +48,7 @@ def main():
         image_shape = None
 
     validate(data_type, model, saved_model=saved_model,
-             image_shape=image_shape)
+             image_shape=image_shape, class_limit=4)
 
 if __name__ == '__main__':
     main()
