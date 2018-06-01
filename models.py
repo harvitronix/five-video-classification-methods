@@ -132,11 +132,22 @@ class ResearchModels():
         model.add(TimeDistributed(MaxPooling2D((2, 2), strides=(2, 2))))
 
         model.add(TimeDistributed(Flatten()))
-
+        
+        
+        ### option 1:
         model.add(Dropout(0.5))
+        model.add(LSTM(256, return_sequences=False, recurrent_dropout=0.5))
+        model.add(Dense(self.nb_classes, activation='softmax'))
+        
+        ### option 2:
         model.add(LSTM(256, return_sequences=False, dropout=0.5))
         model.add(Dense(self.nb_classes, activation='softmax'))
-
+        
+        ### option 3:
+        model.add(LSTM(256, return_sequences=False, dropout=0.5))
+        model.add(Dropout(0.5))
+        model.add(Dense(self.nb_classes, activation='softmax'))
+        
         return model
 
     def mlp(self):
