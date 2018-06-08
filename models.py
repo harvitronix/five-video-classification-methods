@@ -99,41 +99,47 @@ class ResearchModels():
         Also known as an LRCN:
             https://arxiv.org/pdf/1411.4389.pdf
         """
+        def add_default_block(model, kernel_filters, init, reg_lambda):
+
+            # conv
+            model.add(TimeDistributed(Conv2D(kernel_filters, (3, 3), padding='same',
+                                             kernel_initializer=init, kernel_regularizer=L2_reg(l=reg_lambda))))
+            model.add(TimeDistributed(BatchNormalization()))
+            model.add(TimeDistributed(Activation('relu')))
+            # conv
+            model.add(TimeDistributed(Conv2D(kernel_filters, (3, 3), padding='same',
+                                             kernel_initializer=init, kernel_regularizer=L2_reg(l=reg_lambda))))
+            model.add(TimeDistributed(BatchNormalization()))
+            model.add(TimeDistributed(Activation('relu')))
+            # max pool
+            model.add(TimeDistributed(MaxPooling2D((2, 2), strides=(2, 2))))
+
+            return model
+
+        initialiser = 'glorot_uniform'
+        reg_lambda  = 0.001
+
         model = Sequential()
 
-        model.add(TimeDistributed(Conv2D(32, (7, 7), strides=(2, 2),
-            activation='relu', padding='same'), input_shape=self.input_shape))
-        model.add(TimeDistributed(Conv2D(32, (3,3),
-            kernel_initializer="he_normal", activation='relu')))
+        # first (non-default) block
+        model.add(TimeDistributed(Conv2D(32, (7, 7), strides=(2, 2), padding='same',
+                                         kernel_initializer=initialiser, kernel_regularizer=L2_reg(l=reg_lambda)),
+                                  input_shape=self.input_shape))
+        model.add(TimeDistributed(BatchNormalization()))
+        model.add(TimeDistributed(Activation('relu')))
+        model.add(TimeDistributed(Conv2D(32, (3,3), kernel_initializer=initialiser, kernel_regularizer=L2_reg(l=reg_lambda))))
+        model.add(TimeDistributed(BatchNormalization()))
+        model.add(TimeDistributed(Activation('relu')))
         model.add(TimeDistributed(MaxPooling2D((2, 2), strides=(2, 2))))
 
-        model.add(TimeDistributed(Conv2D(64, (3,3),
-            padding='same', activation='relu')))
-        model.add(TimeDistributed(Conv2D(64, (3,3),
-            padding='same', activation='relu')))
-        model.add(TimeDistributed(MaxPooling2D((2, 2), strides=(2, 2))))
+        # 2nd-5th (default) blocks
+        model = add_default_block(model, 64,  init=initialiser, reg_lambda=reg_lambda)
+        model = add_default_block(model, 128, init=initialiser, reg_lambda=reg_lambda)
+        model = add_default_block(model, 256, init=initialiser, reg_lambda=reg_lambda)
+        model = add_default_block(model, 512, init=initialiser, reg_lambda=reg_lambda)
 
-        model.add(TimeDistributed(Conv2D(128, (3,3),
-            padding='same', activation='relu')))
-        model.add(TimeDistributed(Conv2D(128, (3,3),
-            padding='same', activation='relu')))
-        model.add(TimeDistributed(MaxPooling2D((2, 2), strides=(2, 2))))
-
-        model.add(TimeDistributed(Conv2D(256, (3,3),
-            padding='same', activation='relu')))
-        model.add(TimeDistributed(Conv2D(256, (3,3),
-            padding='same', activation='relu')))
-        model.add(TimeDistributed(MaxPooling2D((2, 2), strides=(2, 2))))
-        
-        model.add(TimeDistributed(Conv2D(512, (3,3),
-            padding='same', activation='relu')))
-        model.add(TimeDistributed(Conv2D(512, (3,3),
-            padding='same', activation='relu')))
-        model.add(TimeDistributed(MaxPooling2D((2, 2), strides=(2, 2))))
-
+        # LSTM output head
         model.add(TimeDistributed(Flatten()))
-
-        model.add(Dropout(0.5))
         model.add(LSTM(256, return_sequences=False, dropout=0.5))
         model.add(Dense(self.nb_classes, activation='softmax'))
 
