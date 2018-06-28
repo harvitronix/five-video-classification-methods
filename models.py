@@ -8,12 +8,34 @@ from keras.optimizers import Adam, RMSprop
 from keras.layers.wrappers import TimeDistributed
 from keras.layers.convolutional import (Conv2D, MaxPooling3D, Conv3D,
     MaxPooling2D)
+from keras.utils import multi_gpu_model
+from keras import Model
+
+import tensorflow as tf
+
 from collections import deque
 import sys
 
+# A wrapper class for multi gpu saving and loading
+class ModelMGPU(Model):
+    def __init__(self, ser_model, gpus):
+        pmodel = multi_gpu_model(ser_model, gpus)
+        self.__dict__.update(pmodel.__dict__)
+        self._smodel = ser_model
+
+    def __getattribute__(self, attrname):
+        '''Override load and save methods to be used from the serial-model. The
+        serial-model holds references to the weights in the multi-gpu model.
+        '''
+        # return Model.__getattribute__(self, attrname)
+        if 'load' in attrname or 'save' in attrname:
+            return getattr(self._smodel, attrname)
+
+        return super(ModelMGPU, self).__getattribute__(attrname)
+
 class ResearchModels():
-    def __init__(self, nb_classes, model, seq_length,
-                 saved_model=None, features_length=2048):
+    def __init__(self, nb_classes, model_type, seq_length,
+                 saved_model=None, cnn_feature_size=4032,n_gpus = 8):
         """
         `model` = one of:
             lstm
@@ -40,45 +62,52 @@ class ResearchModels():
 
         # Get the appropriate model.
         if self.saved_model is not None:
-            print("Loading model %s" % self.saved_model)
-            self.model = load_model(self.saved_model)
-        elif model == 'lstm':
+            with tf.device('/cpu:0'):
+                print("Loading model %s" % self.saved_model)
+                serial_model = load_model(self.saved_model)
+        elif model_type == 'lstm':
             print("Loading LSTM model.")
-            self.input_shape = (seq_length, features_length)
-            self.model = self.lstm()
-        elif model == 'lrcn':
+            self.input_shape = (seq_length, cnn_feature_size)
+            serial_model = self.lstm(cnn_feature_size=cnn_feature_size)
+        elif model_type == 'lrcn':
             print("Loading CNN-LSTM model.")
             self.input_shape = (seq_length, 80, 80, 3)
-            self.model = self.lrcn()
-        elif model == 'mlp':
+            serial_model = self.lrcn()
+        elif model_type == 'mlp':
             print("Loading simple MLP.")
-            self.input_shape = (seq_length, features_length)
-            self.model = self.mlp()
-        elif model == 'conv_3d':
+            self.input_shape = (seq_length, cnn_feature_size)
+            serial_model= self.mlp()
+        elif model_type == 'conv_3d':
             print("Loading Conv3D")
             self.input_shape = (seq_length, 80, 80, 3)
-            self.model = self.conv_3d()
-        elif model == 'c3d':
+            serial_model = self.conv_3d()
+        elif model_type == 'c3d':
             print("Loading C3D")
             self.input_shape = (seq_length, 80, 80, 3)
-            self.model = self.c3d()
+            serial_model = self.c3d()
         else:
             print("Unknown network.")
             sys.exit()
 
+        if n_gpus==1:
+            self.model = serial_model
+        else:
+            self.model = ModelMGPU(ser_model=serial_model,gpus=n_gpus)
         # Now compile the network.
-        optimizer = Adam(lr=1e-5, decay=1e-6)
+        optimizer = Adam(lr=1e-5*n_gpus, decay=1e-6)
         self.model.compile(loss='categorical_crossentropy', optimizer=optimizer,
                            metrics=metrics)
 
-        print(self.model.summary())
+        print(serial_model.summary())
 
-    def lstm(self):
+    def lstm(self,cnn_feature_size=4032):
         """Build a simple LSTM network. We pass the extracted features from
         our CNN to this model predomenently."""
         # Model.
         model = Sequential()
-        model.add(LSTM(2048, return_sequences=False,
+
+
+        model.add(LSTM(cnn_feature_size, return_sequences=False,
                        input_shape=self.input_shape,
                        dropout=0.5))
         model.add(Dense(512, activation='relu'))

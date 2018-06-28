@@ -9,8 +9,15 @@ import os.path
 
 def train(data_type, seq_length, model, saved_model=None,
           class_limit=None, image_shape=None,
-          load_to_memory=False, batch_size=32, nb_epoch=100):
+          load_to_memory=False, batch_size=32, nb_epoch=100, n_gpus=8, cnn_model_type='nasnet'):
     # Helper: Save the model.
+    if cnn_model_type == 'InceptionV3':
+        cnn_feature_size = 2048
+    elif cnn_model_type == 'nasnet':
+        cnn_feature_size = 4032
+    else:
+        raise(IOError('invalid cnn_model_type {}'.format(cnn_model_type)))
+
     checkpointer = ModelCheckpoint(
         filepath=os.path.join('data', 'checkpoints', model + '-' + data_type + \
             '.{epoch:03d}-{val_loss:.3f}.hdf5'),
@@ -18,10 +25,10 @@ def train(data_type, seq_length, model, saved_model=None,
         save_best_only=True)
 
     # Helper: TensorBoard
-    tb = TensorBoard(log_dir=os.path.join('data', 'logs', model))
+    tb = TensorBoard(log_dir=os.path.join('data', 'logs', model + time.strftime("%Y%m%d_%H%M%S")))
 
     # Helper: Stop when we stop learning.
-    early_stopper = EarlyStopping(patience=5)
+    early_stopper = EarlyStopping(patience=20)
 
     # Helper: Save results.
     timestamp = time.time()
@@ -47,15 +54,16 @@ def train(data_type, seq_length, model, saved_model=None,
 
     if load_to_memory:
         # Get data.
-        X, y = data.get_all_sequences_in_memory('train', data_type)
-        X_test, y_test = data.get_all_sequences_in_memory('test', data_type)
+        X, y = data.get_all_sequences_in_memory('train', data_type,cnn_model_type=cnn_model_type)
+        X_test, y_test = data.get_all_sequences_in_memory('test', data_type,cnn_model_type=cnn_model_type)
     else:
         # Get generators.
-        generator = data.frame_generator(batch_size, 'train', data_type)
-        val_generator = data.frame_generator(batch_size, 'test', data_type)
+        generator     = data.frame_generator(batch_size, 'train', data_type,cnn_model_type=cnn_model_type)
+        val_generator = data.frame_generator(batch_size, 'test', data_type,cnn_model_type=cnn_model_type)
 
     # Get the model.
-    rm = ResearchModels(len(data.classes), model, seq_length, saved_model)
+    rm = ResearchModels(len(data.classes), model_type=model, seq_length = seq_length,
+                        saved_model = saved_model, n_gpus=n_gpus, cnn_feature_size= cnn_feature_size)
 
     # Fit!
     if load_to_memory:
@@ -87,10 +95,15 @@ def main():
     model = 'lstm'
     saved_model = None  # None or weights file
     class_limit = None  # int, can be 1-101 or None
+
     seq_length = 40
     load_to_memory = False  # pre-load the sequences into memory
-    batch_size = 32
+    n_gpus = 8
+    batch_size = 32* n_gpus
     nb_epoch = 1000
+    cnn_model_type = 'nasnet'
+
+
 
     # Chose images or features and image shape based on network.
     if model in ['conv_3d', 'c3d', 'lrcn']:
@@ -104,7 +117,7 @@ def main():
 
     train(data_type, seq_length, model, saved_model=saved_model,
           class_limit=class_limit, image_shape=image_shape,
-          load_to_memory=load_to_memory, batch_size=batch_size, nb_epoch=nb_epoch)
+          load_to_memory=load_to_memory, batch_size=batch_size, nb_epoch=nb_epoch,n_gpus=n_gpus,cnn_model_type=cnn_model_type)
 
 if __name__ == '__main__':
     main()
