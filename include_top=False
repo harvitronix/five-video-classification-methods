@@ -1,0 +1,8 @@
+ base_model = InceptionV3(
+                weights='imagenet',
+                include_top=True
+) base_model = InceptionV3(
+                weights='imagenet',
+                include_top=True
+)
+why include_top=True? It should be False to extract features
