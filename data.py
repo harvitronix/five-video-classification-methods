@@ -64,7 +64,7 @@ class DataSet():
 
         # ========= CSV STRUCTURE =========
         # dataset (train/test), gesture, video_id , number of frames
-        rootdir = 'data/images'
+        rootdir = 'data'
         data = []
 
         for subdir, _, files in os.walk(rootdir):
