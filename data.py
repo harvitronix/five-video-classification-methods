@@ -70,7 +70,7 @@ class DataSet():
         for subdir, _, files in os.walk(rootdir):
             num_frames = len(files)
             if num_frames > 0:
-                _, _, dataset, gesture, video_id = subdir.split('/')
+                _, dataset, gesture, video_id = subdir.split('/')
                 data.append([dataset, gesture, video_id, num_frames])
         return data
 
