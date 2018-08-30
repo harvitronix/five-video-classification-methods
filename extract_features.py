@@ -18,7 +18,7 @@ from extractor import Extractor
 from tqdm import tqdm
 
 # Set defaults.
-seq_length = 40
+seq_length = 30
 class_limit = None  # Number of classes to extract. Can be 1-101 or None for all.
 
 # Get the dataset.
