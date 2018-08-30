@@ -185,7 +185,7 @@ class DataSet():
                 sample = random.choice(data)
 
                 # Check to see if we've already saved this sequence.
-                if data_type is "images":
+                if data_type == 'images':
                     # Get and resample frames.
                     frames = self.get_frames_for_sample(sample)
                     frames = self.rescale_list(frames, self.seq_length)
@@ -249,9 +249,8 @@ class DataSet():
     def get_frames_for_sample(sample):
         """Given a sample row from the data file, get all the corresponding frame
         filenames."""
-        path = os.path.join('data', sample[0], sample[1])
-        filename = sample[2]
-        images = sorted(glob.glob(os.path.join(path, filename + '*jpg')))
+        path = os.path.join('data', sample[0], sample[1], sample[2])
+        images = sorted(glob.glob(os.path.join(path, '*jpg')))
         return images
 
     @staticmethod
