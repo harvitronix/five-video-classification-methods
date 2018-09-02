@@ -64,14 +64,13 @@ class DataSet():
 
         # ========= CSV STRUCTURE =========
         # dataset (train/test), gesture, video_id , number of frames
-        rootdir = 'data'
         data = []
-
-        for subdir, _, files in os.walk(rootdir):
-            num_frames = len(files)
-            if num_frames > 0:
-                _, dataset, gesture, video_id = subdir.split('/')
-                data.append([dataset, gesture, video_id, num_frames])
+        for root in ['data/train', 'data/validation']:
+            for subdir, _, files in os.walk(root):
+                num_frames = len(files)
+                if num_frames > 0:
+                    _, dataset, gesture, video_id = subdir.split('/')
+                    data.append([dataset, gesture, video_id, num_frames])
         return data
 
 
