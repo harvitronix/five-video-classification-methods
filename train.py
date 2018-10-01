@@ -3,6 +3,7 @@ Train our RNN on extracted features or images.
 """
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping, CSVLogger
 from models import ResearchModels
+from metrics import Metrics
 from data import DataSet
 import time
 import os.path
@@ -57,6 +58,10 @@ def train(data_type, seq_length, model, saved_model=None,
     # Get the model.
     rm = ResearchModels(len(data.classes), model, seq_length, saved_model)
 
+    # Create metrics callback
+    metrics = Metrics()
+
+
     # Fit!
     if load_to_memory:
         # Use standard fit.
@@ -66,7 +71,7 @@ def train(data_type, seq_length, model, saved_model=None,
             batch_size=batch_size,
             validation_data=(X_test, y_test),
             verbose=1,
-            callbacks=[tb, early_stopper, csv_logger],
+            callbacks=[tb, early_stopper, csv_logger, metrics],
             epochs=nb_epoch)
     else:
         # Use fit generator.
@@ -75,7 +80,7 @@ def train(data_type, seq_length, model, saved_model=None,
             steps_per_epoch=steps_per_epoch,
             epochs=nb_epoch,
             verbose=1,
-            callbacks=[tb, early_stopper, csv_logger, checkpointer],
+            callbacks=[tb, early_stopper, csv_logger, checkpointer, metrics],
             validation_data=val_generator,
             validation_steps=40,
             workers=4)
@@ -84,6 +89,7 @@ def main():
     """These are the main training settings. Set each before running
     this file."""
     # model can be one of lstm, lrcn, mlp, conv_3d, c3d
+
     model = 'conv_3d'
     saved_model = None  # None or weights file
     class_limit = None  # int, can be 1-101 or None
