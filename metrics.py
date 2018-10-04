@@ -26,4 +26,4 @@ def specificity(y_true, y_pred):
 def f1(y_true, y_pred):
     # precision = _precision(y_true, y_pred)
     # recall = _recall(y_true, y_pred)
-    return f1_score(y_true, y_pred)
+    return f1_score(np.asarray(y_true), np.asarray(y_pred))
