@@ -32,7 +32,7 @@ def threadsafe_generator(func):
 
 class DataSet():
 
-    def __init__(self, seq_length=40, class_limit=None, image_shape=(224, 224, 3)):
+    def __init__(self, seq_length=30, class_limit=None, image_shape=(224, 224, 3)):
         """Constructor.
         seq_length = (int) the number of frames to consider
         class_limit = (int) number of classes to limit the data to.
@@ -57,11 +57,22 @@ class DataSet():
     @staticmethod
     def get_data():
         """Load our data from file."""
-        with open(os.path.join('data', 'data_file.csv'), 'r') as fin:
-            reader = csv.reader(fin)
-            data = list(reader)
+        # with open(os.path.join('data', 'data_file.csv'), 'r') as fin:
+        #     reader = csv.reader(fin)
+        #     data = list(reader)
+        # return data
 
+        # ========= CSV STRUCTURE =========
+        # dataset (train/test), gesture, video_id , number of frames
+        data = []
+        for root in ['data/train', 'data/validation']:
+            for subdir, _, files in os.walk(root):
+                num_frames = len(files)
+                if num_frames > 0:
+                    _, dataset, gesture, video_id = subdir.split('/')
+                    data.append([dataset, gesture, video_id, num_frames])
         return data
+
 
     def clean_data(self):
         """Limit samples to greater than the sequence length and fewer
@@ -173,7 +184,7 @@ class DataSet():
                 sample = random.choice(data)
 
                 # Check to see if we've already saved this sequence.
-                if data_type is "images":
+                if data_type == 'images':
                     # Get and resample frames.
                     frames = self.get_frames_for_sample(sample)
                     frames = self.rescale_list(frames, self.seq_length)
@@ -237,9 +248,8 @@ class DataSet():
     def get_frames_for_sample(sample):
         """Given a sample row from the data file, get all the corresponding frame
         filenames."""
-        path = os.path.join('data', sample[0], sample[1])
-        filename = sample[2]
-        images = sorted(glob.glob(os.path.join(path, filename + '*jpg')))
+        path = os.path.join('data', sample[0], sample[1], sample[2])
+        images = sorted(glob.glob(os.path.join(path, '*jpg')))
         return images
 
     @staticmethod

@@ -11,6 +11,8 @@ from keras.layers.convolutional import (Conv2D, MaxPooling3D, Conv3D,
 from collections import deque
 import sys
 
+from metrics import f1_score, recall, precision, rmse, f1, precision2, recall2
+
 class ResearchModels():
     def __init__(self, nb_classes, model, seq_length,
                  saved_model=None, features_length=2048):
@@ -34,7 +36,7 @@ class ResearchModels():
         self.feature_queue = deque()
 
         # Set the metrics. Only use top k if there's a need.
-        metrics = ['accuracy']
+        metrics = ['accuracy', recall, precision, f1_score, rmse, f1, precision2, recall2]
         if self.nb_classes >= 10:
             metrics.append('top_k_categorical_accuracy')
 
@@ -124,7 +126,7 @@ class ResearchModels():
         model.add(TimeDistributed(Conv2D(256, (3,3),
             padding='same', activation='relu')))
         model.add(TimeDistributed(MaxPooling2D((2, 2), strides=(2, 2))))
-        
+
         model.add(TimeDistributed(Conv2D(512, (3,3),
             padding='same', activation='relu')))
         model.add(TimeDistributed(Conv2D(512, (3,3),
@@ -239,6 +241,36 @@ class ResearchModels():
         model.add(Dense(4096, activation='relu', name='fc6'))
         model.add(Dropout(0.5))
         model.add(Dense(4096, activation='relu', name='fc7'))
+        model.add(Dropout(0.5))
+        model.add(Dense(self.nb_classes, activation='softmax'))
+
+        return model
+
+
+    def my_net(self):
+        """
+        Build a 3D convolutional network, based loosely on C3D.
+            https://arxiv.org/pdf/1412.0767.pdf
+        """
+        # Model.
+        model = Sequential()
+        model.add(Conv3D(
+            32, (3,3,3), activation='relu', input_shape=self.input_shape
+        ))
+        model.add(MaxPooling3D(pool_size=(1, 2, 2), strides=(1, 2, 2)))
+        model.add(Conv3D(64, (3,3,3), activation='relu'))
+        model.add(MaxPooling3D(pool_size=(1, 2, 2), strides=(1, 2, 2)))
+        model.add(Conv3D(128, (3,3,3), activation='relu'))
+        model.add(Conv3D(128, (3,3,3), activation='relu'))
+        model.add(MaxPooling3D(pool_size=(1, 2, 2), strides=(1, 2, 2)))
+        model.add(Conv3D(256, (2,2,2), activation='relu'))
+        model.add(Conv3D(256, (2,2,2), activation='relu'))
+        model.add(MaxPooling3D(pool_size=(1, 2, 2), strides=(1, 2, 2)))
+
+        model.add(Flatten())
+        model.add(Dense(1024))
+        model.add(Dropout(0.5))
+        model.add(Dense(1024))
         model.add(Dropout(0.5))
         model.add(Dense(self.nb_classes, activation='softmax'))
 

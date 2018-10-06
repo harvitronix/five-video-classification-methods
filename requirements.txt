@@ -5,3 +5,4 @@ tqdm>=4.11.2
 matplotlib>=2.0.0
 Pillow>=2.1.0
 h5py>=2.7.0
+sklearn>=0.0
