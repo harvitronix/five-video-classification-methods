@@ -11,7 +11,7 @@ from keras.layers.convolutional import (Conv2D, MaxPooling3D, Conv3D,
 from collections import deque
 import sys
 
-from metrics import f1_score, recall, precision, rmse
+from metrics import f1_score, recall, precision, rmse, f1
 
 class ResearchModels():
     def __init__(self, nb_classes, model, seq_length,
@@ -36,7 +36,7 @@ class ResearchModels():
         self.feature_queue = deque()
 
         # Set the metrics. Only use top k if there's a need.
-        metrics = ['accuracy', recall, precision, f1_score, rmse]
+        metrics = ['accuracy', recall, precision, f1_score, rmse, f1]
         if self.nb_classes >= 10:
             metrics.append('top_k_categorical_accuracy')
 
