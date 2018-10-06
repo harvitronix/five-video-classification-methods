@@ -17,3 +17,7 @@ def as_keras_metric(method):
 precision = as_keras_metric(tf.metrics.precision)
 recall = as_keras_metric(tf.metrics.recall)
 f1_score = as_keras_metric(tf.contrib.metrics.f1_score)
+
+
+def rmse(y_true, y_pred):
+    return K.sqrt(K.mean(K.square(y_pred - y_true), axis=-1))
