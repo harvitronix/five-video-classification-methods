@@ -70,6 +70,8 @@ def train(data_type, seq_length, model, saved_model=None,
             epochs=nb_epoch)
     else:
         # Use fit generator.
+
+
         rm.model.fit_generator(
             generator=generator,
             steps_per_epoch=steps_per_epoch,
@@ -86,10 +88,10 @@ def main():
     # model can be one of lstm, lrcn, mlp, conv_3d, c3d
     model = 'lstm'
     saved_model = None  # None or weights file
-    class_limit = None  # int, can be 1-101 or None
+    class_limit = 4  # int, can be 1-101 or None
     seq_length = 40
     load_to_memory = False  # pre-load the sequences into memory
-    batch_size = 32
+    batch_size = 8
     nb_epoch = 1000
 
     # Chose images or features and image shape based on network.

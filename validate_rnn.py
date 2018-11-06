@@ -38,7 +38,7 @@ def validate(data_type, model, seq_length=40, saved_model=None,
 
 def main():
     model = 'lstm'
-    saved_model = 'data/checkpoints/lstm-features.026-0.239.hdf5'
+    saved_model = 'data/checkpoints/lstm-features.016-0.181.hdf5'
 
     if model == 'conv_3d' or model == 'lrcn':
         data_type = 'images'

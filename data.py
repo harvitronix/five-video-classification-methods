@@ -185,6 +185,7 @@ class DataSet():
                     sequence = self.get_extracted_sequence(data_type, sample)
 
                     if sequence is None:
+                        print('aaaa')
                         raise ValueError("Can't find sequence. Did you generate them?")
 
                 X.append(sequence)
