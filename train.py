@@ -6,40 +6,60 @@ from models import ResearchModels
 from data import DataSet
 import time
 import os.path
+import sys, json
 
 def train(data_type, seq_length, model, saved_model=None,
           class_limit=None, image_shape=None,
-          load_to_memory=False, batch_size=32, nb_epoch=100):
+          load_to_memory=False, batch_size=32, nb_epoch=100, featureFilePath='data/data_file.csv', workDir = 'data', lr=1e-5, decay=1e-6, classlist=[]):
+
+         
     # Helper: Save the model.
+    checkpointpath = os.path.join(workDir, 'checkpoints')
+    if not os.path.exists(checkpointpath):
+        print ("Creating checkpoint folder [%s]",  checkpointpath)
+        os.makedirs(checkpointpath)
     checkpointer = ModelCheckpoint(
-        filepath=os.path.join('data', 'checkpoints', model + '-' + data_type + \
+        filepath=os.path.join(workDir, 'checkpoints', model + '-' + data_type + \
             '.{epoch:03d}-{val_loss:.3f}.hdf5'),
         verbose=1,
         save_best_only=True)
 
     # Helper: TensorBoard
-    tb = TensorBoard(log_dir=os.path.join('data', 'logs', model))
+    logpath = os.path.join(workDir, 'logs')
+    if not os.path.exists(logpath):
+        print ("Creating log folder [%s]",  logpath)
+        os.makedirs(logpath)    
+    tb = TensorBoard(log_dir=os.path.join(workDir, 'logs', model))
 
     # Helper: Stop when we stop learning.
     early_stopper = EarlyStopping(patience=5)
 
     # Helper: Save results.
     timestamp = time.time()
-    csv_logger = CSVLogger(os.path.join('data', 'logs', model + '-' + 'training-' + \
+    csv_logger = CSVLogger(os.path.join(logpath, model + '-' + 'training-' + \
         str(timestamp) + '.log'))
 
     # Get the data and process it.
     if image_shape is None:
         data = DataSet(
             seq_length=seq_length,
-            class_limit=class_limit
+            class_limit=class_limit,
+            featureFilePath = featureFilePath,
+            workDir=workDir,
+            classlist = classlist
         )
     else:
         data = DataSet(
             seq_length=seq_length,
             class_limit=class_limit,
-            image_shape=image_shape
+            image_shape=image_shape,
+            featureFilePath = featureFilePath,
+            workDir=workDir,
+            classlist = classlist
         )
+    # Check if data is sufficient
+    if False == data.check_data(batch_size):
+        sys.exit(0)
 
     # Get samples per epoch.
     # Multiply by 0.7 to attempt to guess how much of data.data is the train set.
@@ -55,7 +75,7 @@ def train(data_type, seq_length, model, saved_model=None,
         val_generator = data.frame_generator(batch_size, 'test', data_type)
 
     # Get the model.
-    rm = ResearchModels(len(data.classes), model, seq_length, saved_model)
+    rm = ResearchModels(len(data.classes), model, seq_length, saved_model, lr, decay)
 
     # Fit!
     if load_to_memory:
@@ -91,7 +111,36 @@ def main():
     load_to_memory = False  # pre-load the sequences into memory
     batch_size = 32
     nb_epoch = 1000
+    featureFilePath='data/data_file.csv'
+    lr = 1e-5
+    decay = 1e-6    
 
+    #read config file
+    if len(sys.argv) > 1:
+        configfile = sys.argv[1]
+    else:
+        print ("Usage: script <fullpath to config.json>")
+        sys.exit(0)
+    with open("config.json", "r") as config_file:
+        config = json.load(config_file)
+    featureFilePath = os.path.join(config['globaldataRepo'], config['sessiondir'], config["featurefile"])
+    classlist = config["eventtypes"]
+    if not os.path.exists(featureFilePath):
+       print ("event csv path ", featureFilePath, " doesn't exist, exiting")
+       sys.exit(0)
+    workDir = os.path.join(config['globaldataRepo'], config['sessiondir'])
+    for videoConfig in config['training']:
+        if videoConfig["modality"] == "video":
+            model = videoConfig["algorithm"]
+            saved_model = None  # None or weights file
+            seq_length = videoConfig["sequencelength"]
+            if  videoConfig["loadtomemory"] == 1:
+                load_to_memory = True  # pre-load the sequences into memory
+            batch_size = videoConfig["batchsize"]
+            nb_epoch = videoConfig["epochs"]      
+            lr = videoConfig['learningrate']
+            decay = videoConfig['decay']
+       
     # Chose images or features and image shape based on network.
     if model in ['conv_3d', 'c3d', 'lrcn']:
         data_type = 'images'
@@ -104,7 +153,12 @@ def main():
 
     train(data_type, seq_length, model, saved_model=saved_model,
           class_limit=class_limit, image_shape=image_shape,
-          load_to_memory=load_to_memory, batch_size=batch_size, nb_epoch=nb_epoch)
+          load_to_memory=load_to_memory, batch_size=batch_size, nb_epoch=nb_epoch,
+          featureFilePath=featureFilePath,
+          workDir=workDir,
+          lr = lr,
+          decay = decay,
+          classlist = classlist)
 
 if __name__ == '__main__':
     main()

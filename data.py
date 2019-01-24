@@ -32,7 +32,7 @@ def threadsafe_generator(func):
 
 class DataSet():
 
-    def __init__(self, seq_length=40, class_limit=None, image_shape=(224, 224, 3)):
+    def __init__(self, seq_length=40, class_limit=None, image_shape=(224, 224, 3), featureFilePath='data/data_file.csv', workDir='data', classlist=[]):
         """Constructor.
         seq_length = (int) the number of frames to consider
         class_limit = (int) number of classes to limit the data to.
@@ -40,46 +40,59 @@ class DataSet():
         """
         self.seq_length = seq_length
         self.class_limit = class_limit
-        self.sequence_path = os.path.join('data', 'sequences')
+        self.sequence_path = os.path.join(workDir, 'sequences')
         self.max_frames = 300  # max number of frames a video can have for us to use it
 
         # Get the data.
-        self.data = self.get_data()
-
+        self.data = self.get_data(featureFilePath)
+        print (len(self.data), "data samples found")
         # Get the classes.
-        self.classes = self.get_classes()
+        self.classes = self.get_classes(classlist)
 
         # Now do some minor data cleaning.
         self.data = self.clean_data()
-
+        print (len(self.data), "cleaned data samples found")
         self.image_shape = image_shape
 
     @staticmethod
-    def get_data():
+    def get_data(featureFilePath):
         """Load our data from file."""
-        with open(os.path.join('data', 'data_file.csv'), 'r') as fin:
+        with open(featureFilePath, 'r') as fin:
             reader = csv.reader(fin)
             data = list(reader)
-
         return data
 
+    def check_data(self, batch_size):
+        ret = True
+        train, test = self.split_train_test()
+        if len(train) < batch_size:
+            print ("ERROR: [%s] samples [%d] less than batch size of [%d]" % ('train', len(train), batch_size))
+            ret = False
+        if len(test) < batch_size:
+            print ("ERROR: [%s] samples [%d] less than batch size of [%d]" % ('test', len(test), batch_size))
+            ret = False
+        return ret
+            
+            
     def clean_data(self):
         """Limit samples to greater than the sequence length and fewer
         than N frames. Also limit it to classes we want to use."""
         data_clean = []
         for item in self.data:
+            if len(item) < 2: continue # Empty line ?        
             if int(item[3]) >= self.seq_length and int(item[3]) <= self.max_frames \
                     and item[1] in self.classes:
                 data_clean.append(item)
 
         return data_clean
 
-    def get_classes(self):
+    def get_classes(self, classlist):
         """Extract the classes from our data. If we want to limit them,
         only return the classes we need."""
         classes = []
         for item in self.data:
-            if item[1] not in classes:
+            if len(item) < 2: continue #Empty line ?
+            if item[1] not in classes and item[1] in classlist:
                 classes.append(item[1])
 
         # Sort them.
@@ -148,6 +161,8 @@ class DataSet():
 
         return np.array(X), np.array(y)
 
+    
+        
     @threadsafe_generator
     def frame_generator(self, batch_size, train_test, data_type):
         """Return a generator that we can use to train on. There are
@@ -159,7 +174,7 @@ class DataSet():
         train, test = self.split_train_test()
         data = train if train_test == 'train' else test
 
-        print("Creating %s generator with %d samples." % (train_test, len(data)))
+        print("Creating [%s] generator with [%d] samples." % (train_test, len(data)))
 
         while 1:
             X, y = [], []
@@ -212,11 +227,12 @@ class DataSet():
         # First, find the sample row.
         sample = None
         for row in self.data:
-            if row[2] == filename:
+            normfilename = os.path.normpath(row[2])
+            if normfilename == os.path.normpath(filename):
                 sample = row
                 break
         if sample is None:
-            raise ValueError("Couldn't find sample: %s" % filename)
+            raise ValueError("Couldn't find sample: %s" % os.path.normpath(filename))
 
         if data_type == "images":
             # Get and resample frames.
@@ -237,9 +253,8 @@ class DataSet():
     def get_frames_for_sample(sample):
         """Given a sample row from the data file, get all the corresponding frame
         filenames."""
-        path = os.path.join('data', sample[0], sample[1])
         filename = sample[2]
-        images = sorted(glob.glob(os.path.join(path, filename + '*jpg')))
+        images = sorted(glob.glob(os.path.join(filename + '*jpg')))
         return images
 
     @staticmethod

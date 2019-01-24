@@ -1,0 +1,17 @@
+{
+"eventtypes" : ["action", "noaction"],
+"globaldataRepo" : "globaldataRepo",
+"sessionname" : "testsession",
+"featurefile" : "data_file.csv",
+"traintestsplit" : 70,
+"training" :
+[
+    {
+        "modality" : "video",
+        "algorithm" : "lrcn",
+        "sequencelength" : 40,
+        "epochs" : 1000,
+        "trainingfilelist" : "videofilelist-UCF.json"
+    }
+]
+}

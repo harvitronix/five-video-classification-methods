@@ -13,7 +13,7 @@ import sys
 
 class ResearchModels():
     def __init__(self, nb_classes, model, seq_length,
-                 saved_model=None, features_length=2048):
+                 saved_model=None, features_length=2048, lr=1e-5, decay=1e-6):
         """
         `model` = one of:
             lstm
@@ -67,7 +67,7 @@ class ResearchModels():
             sys.exit()
 
         # Now compile the network.
-        optimizer = Adam(lr=1e-5, decay=1e-6)
+        optimizer = Adam(lr=lr, decay=decay)
         self.model.compile(loss='categorical_crossentropy', optimizer=optimizer,
                            metrics=metrics)
 

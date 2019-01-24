@@ -1,0 +1,28 @@
+{
+    "files": [
+        {
+            "name": "UCF-101\\ApplyEyeMakeup\\v_ApplyEyeMakeup_g01_c01.avi",
+            "slices": [
+                {
+                    "classes": [
+                        "ApplyEyeMakeup"
+                    ],
+                    "duration": 6,
+                    "start": "00:00:00"
+                }
+            ]
+        },
+        {
+            "name": "UCF-101\\ApplyLipstick\\v_ApplyLipstick_g01_c01.avi",
+            "slices": [
+                {
+                    "classes": [
+                        "ApplyLipstick"
+                    ],
+                    "duration": 5,
+                    "start": "00:00:00"
+                }
+            ]
+        }
+    ]
+}
