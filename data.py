@@ -32,7 +32,7 @@ def threadsafe_generator(func):
 
 class DataSet():
 
-    def __init__(self, seq_length=40, class_limit=None, image_shape=(224, 224, 3), featureFilePath='data/data_file.csv', workDir='data', classlist=[]):
+    def __init__(self, seq_length=40, class_limit=None, image_shape=(224, 224, 3), repoDir = 'data', featureFilePath='data/data_file.csv', workDir='data', classlist=[]):
         """Constructor.
         seq_length = (int) the number of frames to consider
         class_limit = (int) number of classes to limit the data to.
@@ -41,17 +41,19 @@ class DataSet():
         self.seq_length = seq_length
         self.class_limit = class_limit
         self.sequence_path = os.path.join(workDir, 'sequences')
+        self.repo_dir = repoDir
+        self.work_dir = workDir
         self.max_frames = 300  # max number of frames a video can have for us to use it
 
         # Get the data.
         self.data = self.get_data(featureFilePath)
-        print (len(self.data), "data samples found")
+        print (len(self.data), "data samples in", featureFilePath)
         # Get the classes.
         self.classes = self.get_classes(classlist)
 
         # Now do some minor data cleaning.
         self.data = self.clean_data()
-        print (len(self.data), "cleaned data samples found")
+        print (len(self.data), "cleaned data samples in list")
         self.image_shape = image_shape
 
     @staticmethod
@@ -92,7 +94,7 @@ class DataSet():
         classes = []
         for item in self.data:
             if len(item) < 2: continue #Empty line ?
-            if item[1] not in classes and item[1] in classlist:
+            if item[1] not in classes:  # If configured, use "item[1] in classlist:"
                 classes.append(item[1])
 
         # Sort them.
@@ -143,7 +145,7 @@ class DataSet():
         for row in data:
 
             if data_type == 'images':
-                frames = self.get_frames_for_sample(row)
+                frames = self.get_frames_for_sample(self.repo_dir, row)
                 frames = self.rescale_list(frames, self.seq_length)
 
                 # Build the image sequence
@@ -190,7 +192,7 @@ class DataSet():
                 # Check to see if we've already saved this sequence.
                 if data_type is "images":
                     # Get and resample frames.
-                    frames = self.get_frames_for_sample(sample)
+                    frames = self.get_frames_for_sample(self.repo_dir, sample)
                     frames = self.rescale_list(frames, self.seq_length)
 
                     # Build the image sequence
@@ -236,7 +238,7 @@ class DataSet():
 
         if data_type == "images":
             # Get and resample frames.
-            frames = self.get_frames_for_sample(sample)
+            frames = self.get_frames_for_sample(self.repo_dir, sample)
             frames = self.rescale_list(frames, self.seq_length)
             # Build the image sequence
             sequence = self.build_image_sequence(frames)
@@ -250,11 +252,12 @@ class DataSet():
         return sequence
 
     @staticmethod
-    def get_frames_for_sample(sample):
+    def get_frames_for_sample(repo_dir, sample):
         """Given a sample row from the data file, get all the corresponding frame
         filenames."""
         filename = sample[2]
-        images = sorted(glob.glob(os.path.join(filename + '*jpg')))
+        images = sorted(glob.glob(os.path.join(repo_dir, '**', 'filename*.jpg'), recursive=True))
+        print (filename, len(images))
         return images
 
     @staticmethod

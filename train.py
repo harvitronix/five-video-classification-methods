@@ -10,7 +10,7 @@ import sys, json
 
 def train(data_type, seq_length, model, saved_model=None,
           class_limit=None, image_shape=None,
-          load_to_memory=False, batch_size=32, nb_epoch=100, featureFilePath='data/data_file.csv', workDir = 'data', lr=1e-5, decay=1e-6, classlist=[]):
+          load_to_memory=False, batch_size=32, nb_epoch=100, repoDir='', featureFilePath='data/data_file.csv', workDir = 'data', lr=1e-5, decay=1e-6, classlist=[]):
 
          
     # Helper: Save the model.
@@ -44,6 +44,7 @@ def train(data_type, seq_length, model, saved_model=None,
         data = DataSet(
             seq_length=seq_length,
             class_limit=class_limit,
+            repoDir = repoDir,
             featureFilePath = featureFilePath,
             workDir=workDir,
             classlist = classlist
@@ -53,6 +54,7 @@ def train(data_type, seq_length, model, saved_model=None,
             seq_length=seq_length,
             class_limit=class_limit,
             image_shape=image_shape,
+            repoDir = repoDir,
             featureFilePath = featureFilePath,
             workDir=workDir,
             classlist = classlist
@@ -121,14 +123,15 @@ def main():
     else:
         print ("Usage: script <fullpath to config.json>")
         sys.exit(0)
-    with open("config.json", "r") as config_file:
+    with open(configfile, "r") as config_file:
         config = json.load(config_file)
-    featureFilePath = os.path.join(config['globaldataRepo'], config['sessiondir'], config["featurefile"])
+    featureFilePath = os.path.join(config['globaldataRepo'], config["featurefile"])
     classlist = config["eventtypes"]
     if not os.path.exists(featureFilePath):
        print ("event csv path ", featureFilePath, " doesn't exist, exiting")
        sys.exit(0)
-    workDir = os.path.join(config['globaldataRepo'], config['sessiondir'])
+    workDir = os.path.join(config['globaldataRepo'], config['sessionname'])
+    repoDir = config['globaldataRepo']
     for videoConfig in config['training']:
         if videoConfig["modality"] == "video":
             model = videoConfig["algorithm"]
@@ -154,6 +157,7 @@ def main():
     train(data_type, seq_length, model, saved_model=saved_model,
           class_limit=class_limit, image_shape=image_shape,
           load_to_memory=load_to_memory, batch_size=batch_size, nb_epoch=nb_epoch,
+          repoDir = repoDir,
           featureFilePath=featureFilePath,
           workDir=workDir,
           lr = lr,
