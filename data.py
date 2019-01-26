@@ -256,8 +256,11 @@ class DataSet():
         """Given a sample row from the data file, get all the corresponding frame
         filenames."""
         filename = sample[2]
-        images = sorted(glob.glob(os.path.join(repo_dir, '**', 'filename*.jpg'), recursive=True))
-        print (filename, len(images))
+        train_test = sample[0]
+        folder = sample[1]
+        pre_path = os.path.join(repo_dir, train_test, folder)
+        images = sorted(glob.glob(os.path.join(pre_path, '**', filename+'*.jpg'), recursive=True))        
+        print (filename, "[",len(images),"]")
         return images
 
     @staticmethod
