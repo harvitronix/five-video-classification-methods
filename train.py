@@ -7,29 +7,50 @@ from data import DataSet
 import time
 import os.path
 import sys, json
+from yottato.yottato import yottato as yto
 
 def train(data_type, seq_length, model, saved_model=None,
           class_limit=None, image_shape=None,
-          load_to_memory=False, batch_size=32, nb_epoch=100, repoDir='', featureFilePath='data/data_file.csv', workDir = 'data', lr=1e-5, decay=1e-6, classlist=[]):
+          config = None):
 
-         
+    if config is not None:
+        load_to_memory=config.videoLoadToMemory
+        batch_size=config.videoBatchSize
+        nb_epoch=config.videoEpochs
+        repo_dir=config.repoDir
+        feature_file_path= config.featureFileName
+        work_dir = config.workDir
+        lr= config.videoLearningRate
+        decay= config.videoDecay
+        classlist= config.classes
+    else:
+        load_to_memory=False
+        batch_size=32
+        nb_epoch=100
+        repo_dir=''
+        feature_file_path='data/data_file.csv'
+        work_dir = 'data'
+        lr=1e-5
+        decay=1e-6
+        classlist=[]    
+    
     # Helper: Save the model.
-    checkpointpath = os.path.join(workDir, 'checkpoints')
+    checkpointpath = os.path.join(work_dir, 'checkpoints')
     if not os.path.exists(checkpointpath):
         print ("Creating checkpoint folder [%s]",  checkpointpath)
         os.makedirs(checkpointpath)
     checkpointer = ModelCheckpoint(
-        filepath=os.path.join(workDir, 'checkpoints', model + '-' + data_type + \
+        filepath=os.path.join(work_dir, 'checkpoints', model + '-' + data_type + \
             '.{epoch:03d}-{val_loss:.3f}.hdf5'),
         verbose=1,
         save_best_only=True)
 
     # Helper: TensorBoard
-    logpath = os.path.join(workDir, 'logs')
+    logpath = os.path.join(work_dir, 'logs')
     if not os.path.exists(logpath):
         print ("Creating log folder [%s]",  logpath)
         os.makedirs(logpath)    
-    tb = TensorBoard(log_dir=os.path.join(workDir, 'logs', model))
+    tb = TensorBoard(log_dir=os.path.join(work_dir, 'logs', model))
 
     # Helper: Stop when we stop learning.
     early_stopper = EarlyStopping(patience=5)
@@ -44,9 +65,9 @@ def train(data_type, seq_length, model, saved_model=None,
         data = DataSet(
             seq_length=seq_length,
             class_limit=class_limit,
-            repoDir = repoDir,
-            featureFilePath = featureFilePath,
-            workDir=workDir,
+            repo_dir = repo_dir,
+            feature_file_path = feature_file_path,
+            work_dir=work_dir,
             classlist = classlist
         )
     else:
@@ -54,13 +75,14 @@ def train(data_type, seq_length, model, saved_model=None,
             seq_length=seq_length,
             class_limit=class_limit,
             image_shape=image_shape,
-            repoDir = repoDir,
-            featureFilePath = featureFilePath,
-            workDir=workDir,
+            repo_dir = repo_dir,
+            feature_file_path = feature_file_path,
+            work_dir=work_dir,
             classlist = classlist
         )
     # Check if data is sufficient
     if False == data.check_data(batch_size):
+        print ("Insufficient data")
         sys.exit(0)
 
     # Get samples per epoch.
@@ -113,7 +135,7 @@ def main():
     load_to_memory = False  # pre-load the sequences into memory
     batch_size = 32
     nb_epoch = 1000
-    featureFilePath='data/data_file.csv'
+    feature_file_path='data/data_file.csv'
     lr = 1e-5
     decay = 1e-6    
 
@@ -123,27 +145,11 @@ def main():
     else:
         print ("Usage: script <fullpath to config.json>")
         sys.exit(0)
-    with open(configfile, "r") as config_file:
-        config = json.load(config_file)
-    featureFilePath = os.path.join(config['globaldataRepo'], config["featurefile"])
-    classlist = config["eventtypes"]
-    if not os.path.exists(featureFilePath):
-       print ("event csv path ", featureFilePath, " doesn't exist, exiting")
-       sys.exit(0)
-    workDir = os.path.join(config['globaldataRepo'], config['sessionname'])
-    repoDir = config['globaldataRepo']
-    for videoConfig in config['training']:
-        if videoConfig["modality"] == "video":
-            model = videoConfig["algorithm"]
-            saved_model = None  # None or weights file
-            seq_length = videoConfig["sequencelength"]
-            if  videoConfig["loadtomemory"] == 1:
-                load_to_memory = True  # pre-load the sequences into memory
-            batch_size = videoConfig["batchsize"]
-            nb_epoch = videoConfig["epochs"]      
-            lr = videoConfig['learningrate']
-            decay = videoConfig['decay']
-       
+    
+    yto_config = yto(sys.argv[1])
+    model = yto_config.videoAlgorithm
+    seq_length = yto_config.videoSeqLength
+    
     # Chose images or features and image shape based on network.
     if model in ['conv_3d', 'c3d', 'lrcn']:
         data_type = 'images'
@@ -156,13 +162,7 @@ def main():
 
     train(data_type, seq_length, model, saved_model=saved_model,
           class_limit=class_limit, image_shape=image_shape,
-          load_to_memory=load_to_memory, batch_size=batch_size, nb_epoch=nb_epoch,
-          repoDir = repoDir,
-          featureFilePath=featureFilePath,
-          workDir=workDir,
-          lr = lr,
-          decay = decay,
-          classlist = classlist)
+          config = yto_config)
 
 if __name__ == '__main__':
     main()

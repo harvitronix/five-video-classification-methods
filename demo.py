@@ -26,11 +26,13 @@ def predict(data_type, seq_length, saved_model, image_shape, video_name, class_l
     if image_shape is None:
         data = DataSet(seq_length=seq_length, class_limit=class_limit,
             feature_file_path = feature_file_path,
+            repo_dir = config.repoDir,
             work_dir=work_dir, classlist=classlist)
     else:
         data = DataSet(seq_length=seq_length, image_shape=image_shape,
             class_limit=class_limit,
             feature_file_path = feature_file_path,
+            repo_dir = config.repoDir,
             work_dir=work_dir, classlist=classlist)
     
     # Extract the sample from the data.

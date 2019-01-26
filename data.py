@@ -32,7 +32,7 @@ def threadsafe_generator(func):
 
 class DataSet():
 
-    def __init__(self, seq_length=40, class_limit=None, image_shape=(224, 224, 3), repoDir = 'data', featureFilePath='data/data_file.csv', workDir='data', classlist=[]):
+    def __init__(self, seq_length=40, class_limit=None, image_shape=(224, 224, 3), repo_dir = 'data', feature_file_path='data_file.csv', work_dir='data', classlist=[]):
         """Constructor.
         seq_length = (int) the number of frames to consider
         class_limit = (int) number of classes to limit the data to.
@@ -40,14 +40,14 @@ class DataSet():
         """
         self.seq_length = seq_length
         self.class_limit = class_limit
-        self.sequence_path = os.path.join(workDir, 'sequences')
-        self.repo_dir = repoDir
-        self.work_dir = workDir
+        self.sequence_path = os.path.join(work_dir, 'sequences')
+        self.repo_dir = repo_dir
+        self.work_dir = work_dir
         self.max_frames = 300  # max number of frames a video can have for us to use it
 
         # Get the data.
-        self.data = self.get_data(featureFilePath)
-        print (len(self.data), "data samples in", featureFilePath)
+        self.data = self.get_data(os.path.join(repo_dir, feature_file_path))
+        print (len(self.data), "data samples in", feature_file_path)
         # Get the classes.
         self.classes = self.get_classes(classlist)
 
@@ -57,9 +57,9 @@ class DataSet():
         self.image_shape = image_shape
 
     @staticmethod
-    def get_data(featureFilePath):
+    def get_data(feature_file_path):
         """Load our data from file."""
-        with open(featureFilePath, 'r') as fin:
+        with open(feature_file_path, 'r') as fin:
             reader = csv.reader(fin)
             data = list(reader)
         return data
