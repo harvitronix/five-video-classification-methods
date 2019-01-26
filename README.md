@@ -71,21 +71,17 @@ Before you can run the `lstm` and `mlp`, you need to extract features from the i
 
 The CNN-only method (method #1 in the blog post) is run from `train_cnn.py`.
 
-The rest of the models are run from `train.py`. There are configuration options you can set in that file to choose which model you want to run.
+The rest of the models are run from `train.py`. Configurations can be performed using the config/config.json
 
 The models are all defined in `models.py`. Reference that file to see which models you are able to run in `train.py`.
 
 Training logs are saved to CSV and also to TensorBoard files. To see progress while training, run `tensorboard --logdir=data/logs` from the project root folder.
 
-## Demo/Using models
-
-I have not yet implemented a demo where you can pass a video file to a model and get a prediction. Pull requests are welcome if you'd like to help out!
-
 ## TODO
 
 - [ ] Add data augmentation to fight overfitting
 - [x] Support multiple workers in the data generator for faster training
-- [ ] Add a demo script
+- [x] Add a demo script
 - [ ] Support other datasets
 - [ ] Implement optical flow
 - [ ] Implement more complex network architectures, like optical flow/CNN fusion
