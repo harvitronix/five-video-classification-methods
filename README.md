@@ -40,10 +40,12 @@ config/config.json
 Typically, the below parameters would need to be configured. Note - the instructions in below section (Getting the data, or running different commands) apply to the already set default parameters.
 
 - globalDataRepo : This locates a central place where media files are stored, and where results of analysis are kept
-DEFAULT: ./data
+
+DEFAULT Repo location: ./data
 
 - training/algorithm : This identifies the model/algorithm to be used (ex, lrcn, lstm, cnn etc)
 
+DEFAULT algorithm : lrcn
 
 ## Getting the data
 
