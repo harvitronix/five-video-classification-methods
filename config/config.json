@@ -1,0 +1,22 @@
+{
+"classes" : ["PlayingDhol", "BenchPress"],
+"globaldataRepo" : "data",
+"sessionname" : "testsession",
+"featurefile" : "data_file.csv",
+"traintestsplit" : 70,
+"training" :
+[
+    {
+        "modality" : "video",
+        "algorithm" : "lrcn",
+        "sequencelength" : 40,
+        "maxframes": 300,
+        "loadtomemory" : 0,
+        "batchsize" : 32,
+        "epochs" : 1000,
+        "learningrate" : 0.00001,
+        "decay"        : 0.000001,        
+        "trainingfilelist" : "videofilelist-UCF.json"
+    }
+]
+}
