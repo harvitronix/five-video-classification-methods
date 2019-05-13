@@ -115,7 +115,7 @@ class DataSet():
                 test.append(item)
         return train, test
 
-    def get_all_sequences_in_memory(self, train_test, data_type):
+    def get_all_sequences_in_memory(self, train_test, data_type,cnn_model_type):
         """
         This is a mirror of our generator, but attempts to load everything into
         memory so we can train way faster.
@@ -137,11 +137,11 @@ class DataSet():
                 sequence = self.build_image_sequence(frames)
 
             else:
-                sequence = self.get_extracted_sequence(data_type, row)
+                sequence = self.get_extracted_sequence(data_type, row,cnn_model_type=cnn_model_type)
 
                 if sequence is None:
                     print("Can't find sequence. Did you generate them?")
-                    raise
+                    raise(IOError)
 
             X.append(sequence)
             y.append(self.get_class_one_hot(row[1]))
@@ -149,7 +149,7 @@ class DataSet():
         return np.array(X), np.array(y)
 
     @threadsafe_generator
-    def frame_generator(self, batch_size, train_test, data_type):
+    def frame_generator(self, batch_size, train_test, data_type,cnn_model_type):
         """Return a generator that we can use to train on. There are
         a couple different things we can return:
 
@@ -182,7 +182,7 @@ class DataSet():
                     sequence = self.build_image_sequence(frames)
                 else:
                     # Get the sequence from disk.
-                    sequence = self.get_extracted_sequence(data_type, sample)
+                    sequence = self.get_extracted_sequence(data_type, sample,cnn_model_type=cnn_model_type)
 
                     if sequence is None:
                         raise ValueError("Can't find sequence. Did you generate them?")
@@ -196,17 +196,17 @@ class DataSet():
         """Given a set of frames (filenames), build our sequence."""
         return [process_image(x, self.image_shape) for x in frames]
 
-    def get_extracted_sequence(self, data_type, sample):
+    def get_extracted_sequence(self, data_type, sample,cnn_model_type):
         """Get the saved extracted features."""
         filename = sample[2]
-        path = os.path.join(self.sequence_path, filename + '-' + str(self.seq_length) + \
+        path = os.path.join(self.sequence_path, filename + '-' + str(self.seq_length) +  '-' + cnn_model_type + \
             '-' + data_type + '.npy')
         if os.path.isfile(path):
             return np.load(path)
         else:
             return None
 
-    def get_frames_by_filename(self, filename, data_type):
+    def get_frames_by_filename(self, filename, data_type,cnn_model_type):
         """Given a filename for one of our samples, return the data
         the model needs to make predictions."""
         # First, find the sample row.
@@ -226,7 +226,7 @@ class DataSet():
             sequence = self.build_image_sequence(frames)
         else:
             # Get the sequence from disk.
-            sequence = self.get_extracted_sequence(data_type, sample)
+            sequence = self.get_extracted_sequence(data_type, sample,cnn_model_type=cnn_model_type)
 
             if sequence is None:
                 raise ValueError("Can't find sequence. Did you generate them?")

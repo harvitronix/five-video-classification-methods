@@ -12,7 +12,7 @@ from keras.models import load_model
 from data import DataSet
 import numpy as np
 
-def predict(data_type, seq_length, saved_model, image_shape, video_name, class_limit):
+def predict(data_type, seq_length, saved_model, image_shape, video_name, class_limit,cnn_model_type):
     model = load_model(saved_model)
 
     # Get the data and process it.
@@ -23,7 +23,7 @@ def predict(data_type, seq_length, saved_model, image_shape, video_name, class_l
             class_limit=class_limit)
     
     # Extract the sample from the data.
-    sample = data.get_frames_by_filename(video_name, data_type)
+    sample = data.get_frames_by_filename(video_name, data_type,cnn_model_type=cnn_model_type)
 
     # Predict!
     prediction = model.predict(np.expand_dims(sample, axis=0))
@@ -48,7 +48,7 @@ def main():
     # an actual video file, extract frames, generate sequences, etc.
     #video_name = 'v_Archery_g04_c02'
     video_name = 'v_ApplyLipstick_g01_c01'
-
+    cnn_model_type = 'InceptionV3'
     # Chose images or features and image shape based on network.
     if model in ['conv_3d', 'c3d', 'lrcn']:
         data_type = 'images'
@@ -59,7 +59,7 @@ def main():
     else:
         raise ValueError("Invalid model. See train.py for options.")
 
-    predict(data_type, seq_length, saved_model, image_shape, video_name, class_limit)
+    predict(data_type, seq_length, saved_model, image_shape, video_name, class_limit,cnn_model_type)
 
 if __name__ == '__main__':
     main()

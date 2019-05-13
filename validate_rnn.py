@@ -7,7 +7,7 @@ from models import ResearchModels
 from data import DataSet
 
 def validate(data_type, model, seq_length=40, saved_model=None,
-             class_limit=None, image_shape=None):
+             class_limit=None, image_shape=None,cnn_model_type='InceptionV3'):
     batch_size = 32
 
     # Get the data and process it.
@@ -23,7 +23,7 @@ def validate(data_type, model, seq_length=40, saved_model=None,
             image_shape=image_shape
         )
 
-    val_generator = data.frame_generator(batch_size, 'test', data_type)
+    val_generator = data.frame_generator(batch_size, 'test', data_type,cnn_model_type=cnn_model_type)
 
     # Get the model.
     rm = ResearchModels(len(data.classes), model, seq_length, saved_model)
@@ -39,6 +39,7 @@ def validate(data_type, model, seq_length=40, saved_model=None,
 def main():
     model = 'lstm'
     saved_model = 'data/checkpoints/lstm-features.026-0.239.hdf5'
+    cnn_model_type = 'InceptionV3'
 
     if model == 'conv_3d' or model == 'lrcn':
         data_type = 'images'
@@ -48,7 +49,7 @@ def main():
         image_shape = None
 
     validate(data_type, model, saved_model=saved_model,
-             image_shape=image_shape, class_limit=4)
+             image_shape=image_shape, class_limit=4,cnn_model_type=cnn_model_type)
 
 if __name__ == '__main__':
     main()
