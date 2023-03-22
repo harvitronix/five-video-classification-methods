@@ -57,7 +57,7 @@ class DataSet():
     @staticmethod
     def get_data():
         """Load our data from file."""
-        with open(os.path.join('data', 'data_file.csv'), 'r') as fin:
+        with open(os.path.join('data', 'data_file.csv'), 'r', newline="\n") as fin:
             reader = csv.reader(fin)
             data = list(reader)
 
